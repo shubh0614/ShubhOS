@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShubhOS — Shubh Pathak's interactive portfolio</title>
+<meta name="description" content="Boot into ShubhOS: Shubh Pathak's portfolio as a tiny operating system. Drag windows, train a neural network, run terminal commands, match your JD against his experience.">
+<meta property="og:title" content="ShubhOS — an operating system that is also a portfolio">
+<meta property="og:description" content="Shubh Pathak builds AI systems and data platforms at UBS. Boot in and explore.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Albert+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F5F3; --card:#FDFDFC; --ink:#17211D; --body:#47534D; --muted:#76837C;
+  --line:#E2E8E4; --pine:#1F6F5C; --pine-deep:#175743; --pine-soft:#E7F2EE;
+  --gold:#C0913A; --gold-soft:#F7F0E0; --clay:#C96F4A;
+  --disp:'Fraunces',Georgia,serif; --sans:'Albert Sans',system-ui,sans-serif; --mono:'Spline Sans Mono',monospace;
+  --sh-win:0 8px 20px rgba(23,33,29,.10),0 30px 80px rgba(23,33,29,.16);
+  --sh-sm:0 1px 2px rgba(23,33,29,.05),0 4px 14px rgba(23,33,29,.06);
+  --menubar:42px; --dockh:86px;
+  --card2:#FFFFFF; --tbbg:rgba(247,250,248,.8); --dockbg:rgba(253,253,252,.72); --mbbg:rgba(250,252,250,.72);
+  --deskA:#E9F1EC; --deskB:#F3F1E8; --neutral:#EFEFEA; --babg:#F4F4F0; --batag:#A9AFA4;
+  --ba-after-ink:#1C4435; --ba-after-b:#175743; --hint:rgba(118,131,124,.85); --diconbg:rgba(255,255,255,.65); --sidebg:rgba(247,250,248,.6);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow:hidden}
+::selection{background:var(--pine);color:#fff}
+a{color:var(--pine);text-decoration:none}
+button{font-family:var(--sans);cursor:pointer}
+:focus-visible{outline:2px solid var(--pine);outline-offset:2px;border-radius:4px}
+
+/* ============ BOOT ============ */
+#boot{position:fixed;inset:0;z-index:300;background:linear-gradient(165deg,#EDF3EF,#F6F3EA);transition:opacity .6s ease,visibility .6s}
+body.dark #boot{background:linear-gradient(165deg,#0C1310,#151C12)}
+#boot{display:flex;align-items:center;justify-content:center}
+#boot.away{opacity:0;visibility:hidden}
+.boot-inner{text-align:center}
+.boot-logo{font-family:var(--disp);font-weight:700;font-size:54px;color:var(--pine)}
+.boot-name{font-family:var(--disp);font-weight:600;font-size:26px;margin-top:6px;letter-spacing:.01em}
+.boot-sub{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:10px;letter-spacing:.08em}
+.boot-bar{width:220px;height:4px;background:var(--line);border-radius:99px;margin:26px auto 0;overflow:hidden}
+.boot-fill{height:100%;width:0;background:var(--pine);border-radius:99px;transition:width 1.5s cubic-bezier(.3,.6,.3,1)}
+.boot-skip{margin-top:22px;font-size:12.5px;color:var(--muted);background:none;border:none;text-decoration:underline;text-underline-offset:3px}
+
+/* ============ MENUBAR ============ */
+#menubar{position:fixed;top:0;left:0;right:0;height:var(--menubar);z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--mbbg);backdrop-filter:blur(14px);border-bottom:1px solid rgba(226,232,228,.9);font-size:13.5px}
+.mb-left{display:flex;align-items:center;gap:16px}
+.mb-logo{font-family:var(--disp);font-weight:700;color:var(--pine);font-size:15px}
+.mb-app{font-weight:700}
+.mb-right{display:flex;align-items:center;gap:16px;font-size:13px}
+.mb-right a{color:var(--body)}
+.mb-right a:hover{color:var(--pine-deep)}
+#clock{font-family:var(--mono);font-size:12.5px;color:var(--body);min-width:118px;text-align:right}
+#themeBtn{background:none;border:1px solid var(--line);border-radius:99px;width:30px;height:30px;font-size:13px;display:flex;align-items:center;justify-content:center;transition:transform .25s,border-color .2s;padding:0}
+#themeBtn:hover{transform:rotate(20deg);border-color:var(--muted)}
+@media(max-width:560px){.mb-right a.hideS{display:none}}
+
+/* ============ DARK MODE ============ */
+body.dark{
+  --bg:#0F1613; --card:#16201B; --card2:#1D2922; --ink:#E7EFEA; --body:#B9C6BF; --muted:#84958C; --line:#27342D;
+  --pine:#3FA98C; --pine-deep:#7FCDB4; --pine-soft:#1D3129; --gold:#D2A455; --gold-soft:#2E2818;
+  --tbbg:rgba(22,32,27,.85); --dockbg:rgba(20,29,24,.78); --mbbg:rgba(13,19,16,.8);
+  --deskA:#0C1310; --deskB:#131A12; --neutral:#232E27; --babg:#1B241F; --batag:#6E7E75;
+  --ba-after-ink:#BFE3D4; --ba-after-b:#E4F5ED; --hint:rgba(150,165,157,.65); --diconbg:rgba(255,255,255,.06); --sidebg:rgba(255,255,255,.03);
+  --sh-win:0 8px 20px rgba(0,0,0,.4),0 30px 80px rgba(0,0,0,.55); --sh-sm:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.28);
+}
+body.dark .btn.pine{color:#0F1613}
+body.dark .btn.pine:hover{background:#5BC0A3}
+body.dark #trainBtn.training{color:#0F1613}
+body.dark .file-ico{border-color:#2C4439}
+body.dark ::selection{background:var(--pine);color:#0F1613}
+
+/* ============ DESKTOP / WALLPAPER ============ */
+#desktop{position:fixed;inset:var(--menubar) 0 0 0;overflow:hidden;background:linear-gradient(160deg,var(--deskA) 0%,var(--deskB) 100%)}
+#wall{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.desk-hint{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--dockh) + 18px);font-family:var(--mono);font-size:12px;color:var(--hint);letter-spacing:.06em;pointer-events:none;transition:opacity .6s}
+.desk-hint.away{opacity:0}
+
+/* ============ DOCK ============ */
+#dock{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;z-index:210;display:flex;gap:6px;align-items:flex-end;background:var(--dockbg);backdrop-filter:blur(16px);border:1px solid rgba(226,232,228,.95);border-radius:22px;padding:9px 12px;box-shadow:var(--sh-sm);max-width:calc(100vw - 16px);overflow:visible;scrollbar-width:none}
+#dock::-webkit-scrollbar{display:none}
+.dicon{position:relative;width:50px;height:50px;border-radius:14px;border:none;background:var(--diconbg);font-size:24px;display:flex;align-items:center;justify-content:center;transition:transform .18s cubic-bezier(.3,1.4,.5,1),background .18s;flex:0 0 50px}
+.dicon:hover{transform:translateY(-7px) scale(1.12);background:var(--card2)}
+.dicon .tip{position:absolute;bottom:62px;left:50%;transform:translateX(-50%) translateY(4px);background:#1B2620;color:#F2F7F4;text-align:left;padding:8px 12px;border-radius:10px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.dicon .tip b{display:block;font-size:12px;font-weight:700}
+.dicon .tip i{display:block;font-style:normal;font-weight:500;font-size:10.5px;color:#AFC4BA;margin-top:2px}
+.dicon .tip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1B2620}
+.dicon:hover .tip,.dicon:focus-visible .tip{opacity:1;transform:translateX(-50%) translateY(0)}
+.dicon .run{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:4.5px;height:4.5px;border-radius:50%;background:var(--pine);opacity:0;transition:opacity .2s}
+.dicon.open .run{opacity:1}
+.dicon.bounce{animation:bounce .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bounce{0%{transform:translateY(0)}40%{transform:translateY(-14px)}100%{transform:translateY(0)}}
+.dock-sep{width:1px;align-self:stretch;background:var(--line);margin:4px 4px}
+
+/* ============ WINDOWS ============ */
+.window{position:absolute;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh-win);display:none;flex-direction:column;min-width:300px;min-height:200px;overflow:hidden}
+.window.open{display:flex;animation:winin .28s cubic-bezier(.2,.9,.3,1.1)}
+@keyframes winin{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+.window.max{top:6px !important;left:6px !important;right:6px;bottom:6px;width:auto !important;height:auto !important}
+.titlebar{height:44px;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid var(--line);background:var(--tbbg);cursor:grab;user-select:none;flex:0 0 44px}
+.titlebar:active{cursor:grabbing}
+.dots{display:flex;gap:7px}
+.dot{width:12px;height:12px;border-radius:50%;border:none;padding:0;position:relative}
+.dot.close{background:var(--clay)}
+.dot.min{background:var(--gold)}
+.dot.max{background:var(--pine)}
+.dot:hover::after{content:"";position:absolute;inset:2.5px;border-radius:50%;background:rgba(255,255,255,.55)}
+.wtitle{font-weight:700;font-size:13.5px;color:var(--body);flex:1;text-align:center;margin-right:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wbody{flex:1;overflow:auto;padding:24px;overscroll-behavior:contain}
+.wbody.nopad{padding:0}
+.rs{position:absolute;right:0;bottom:0;width:16px;height:16px;cursor:nwse-resize}
+.rs::after{content:"";position:absolute;right:4px;bottom:4px;width:7px;height:7px;border-right:2px solid #C6CFC9;border-bottom:2px solid #C6CFC9;border-radius:1px}
+
+/* ============ SHARED APP UI ============ */
+.btn{display:inline-block;border-radius:99px;padding:11px 22px;font-size:14px;font-weight:600;border:1.5px solid transparent;transition:all .2s;cursor:pointer}
+.btn.pine{background:var(--pine);color:#fff}
+.btn.pine:hover{background:var(--pine-deep)}
+.btn.line{border-color:var(--line);color:var(--ink);background:var(--card2)}
+.btn.line:hover{border-color:var(--ink)}
+.btn.sm{padding:9px 16px;font-size:13px}
+h3.app-h{font-family:var(--disp);font-weight:600;font-size:22px;line-height:1.2;margin-bottom:6px}
+h3.app-h em{font-style:italic;color:var(--pine)}
+.app-sub{color:var(--body);font-size:14px;margin-bottom:18px}
+.mono-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.chip{font-family:var(--mono);font-size:11.5px;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:3px 11px;display:inline-block}
+.delta{font-family:var(--mono);background:var(--pine-soft);color:var(--pine-deep);border-radius:99px;padding:5px 14px;font-size:13px;white-space:nowrap;display:inline-block}
+.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--pine);box-shadow:0 0 0 0 rgba(31,111,92,.45);animation:pulse 2.4s infinite;margin-right:7px;vertical-align:1px}
+@keyframes pulse{70%{box-shadow:0 0 0 9px rgba(31,111,92,0)}100%{box-shadow:0 0 0 0 rgba(31,111,92,0)}}
+
+/* about app */
+.avatar{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,var(--pine),#3C8F77);color:#fff;font-family:var(--disp);font-weight:700;font-size:27px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.spec{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.spec:last-child{border-bottom:none}
+.spec .k{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.spec .v{font-weight:600;text-align:right}
+
+/* projects app */
+.pj-wrap{display:flex;height:100%}
+.pj-side{width:218px;flex:0 0 218px;border-right:1px solid var(--line);overflow-y:auto;background:var(--sidebg)}
+.pj-item{display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);padding:14px 16px;font-size:13.5px;font-weight:600;color:var(--body);line-height:1.4}
+.pj-item small{display:block;font-family:var(--mono);font-size:10.5px;color:var(--muted);font-weight:400;margin-top:3px;letter-spacing:.04em}
+.pj-item:hover{background:var(--card2)}
+.pj-item.on{background:var(--card2);color:var(--ink);box-shadow:inset 3px 0 0 var(--pine)}
+.pj-main{flex:1;overflow-y:auto;padding:24px 26px}
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.ba-box{border-radius:14px;padding:16px 18px;font-size:13.5px;line-height:1.6}
+.ba-box .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;display:block;margin-bottom:7px}
+.ba-before{background:var(--babg);color:var(--muted)}
+.ba-before .tag{color:var(--batag)}
+.ba-after{background:var(--pine-soft);color:var(--ba-after-ink)}
+.ba-after .tag{color:var(--pine)}
+.ba-after b{color:var(--ba-after-b)}
+@media(max-width:740px){.ba{grid-template-columns:1fr}.pj-side{width:160px;flex-basis:160px}}
+
+/* impact app */
+.imp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.imp{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--sh-sm)}
+.imp b{font-family:var(--disp);font-size:clamp(38px,4.6vw,48px);font-weight:700;display:block;letter-spacing:-.02em;line-height:1.1}
+.imp b small{font-size:.55em;color:var(--pine)}
+.imp span{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.5;display:block;margin-top:4px}
+
+/* lab app (reuses tested engine) */
+.lab-grid{display:grid;grid-template-columns:1.3fr .7fr;gap:16px;align-items:start}
+@media(max-width:820px){.lab-grid{grid-template-columns:1fr}}
+.lab-card{background:var(--card2);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--sh-sm)}
+#nnCanvas{display:block;width:100%;cursor:crosshair;touch-action:manipulation}
+.stat-row{display:flex;border-top:1px solid var(--line)}
+.stat{flex:1;padding:10px 4px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.stat+.stat{border-left:1px solid var(--line)}
+.stat b{display:block;font-family:var(--disp);font-size:18px;color:var(--ink);font-weight:600}
+.lab-block{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:var(--sh-sm)}
+.lab-block h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--muted);font-weight:500;margin-bottom:10px;text-transform:uppercase}
+.cls-row{display:flex;gap:8px}
+.cls{flex:1;border:1.5px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--body)}
+.cls .sw{width:13px;height:13px;border-radius:50%;flex:0 0 13px}
+.cls[data-c="1"] .sw{background:var(--pine)}
+.cls[data-c="0"] .sw{background:var(--gold)}
+.cls.on{border-color:var(--ink);background:var(--card2);color:var(--ink)}
+.preset-row{display:flex;gap:7px;flex-wrap:wrap}
+.preset{font-family:var(--mono);font-size:12px;border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:5px 13px;color:var(--body)}
+.preset:hover{border-color:var(--pine);color:var(--pine-deep)}
+.lab-actions{display:flex;gap:8px;flex-wrap:wrap}
+#trainBtn{flex:1;min-width:130px}
+#trainBtn.training{background:var(--gold)}
+.lab-note{font-size:12.5px;color:var(--muted);line-height:1.6}
+
+/* matcher app */
+#jdText{width:100%;min-height:150px;resize:vertical;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-family:var(--sans);font-size:14px;color:var(--ink);line-height:1.6}
+#jdText:focus{outline:none;border-color:var(--pine)}
+.m-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.m-samples{font-size:12.5px;color:var(--muted)}
+.m-samples button{background:none;border:none;color:var(--pine);font-size:12.5px;text-decoration:underline;text-underline-offset:3px;padding:0 2px}
+#m-result{display:none;margin-top:18px}
+#m-result.show{display:block;animation:fadeup .5s ease}
+@keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.score-wrap{display:flex;gap:18px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:18px}
+.ring{position:relative;width:96px;height:96px;flex:0 0 96px}
+.ring svg{transform:rotate(-90deg)}
+.ring .bgc{stroke:var(--line);fill:none;stroke-width:8}
+.ring .fgc{stroke:var(--pine);fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:264;stroke-dashoffset:264;transition:stroke-dashoffset 1.2s cubic-bezier(.2,.7,.2,1)}
+.ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;font-size:22px}
+.score-text .verdict{font-family:var(--disp);font-weight:600;font-size:17px;line-height:1.3}
+.score-text .vsub{color:var(--body);font-size:13px;margin-top:4px}
+.m-resume-rec{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+.m-list{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.m-row{display:flex;gap:12px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-size:13px;line-height:1.5}
+.m-row .mk{flex:0 0 20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;margin-top:1px}
+.m-row.hit .mk{background:var(--pine-soft);color:var(--pine-deep)}
+.m-row.gap .mk{background:var(--neutral);color:var(--muted)}
+.m-row .sk{font-weight:600}
+.m-row .evd{color:var(--body)}
+.m-more{font-size:12px;color:var(--muted);margin-top:10px}
+
+/* resume app */
+.file-card{display:flex;gap:16px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:var(--sh-sm)}
+.file-ico{width:50px;height:60px;border-radius:8px;background:var(--pine-soft);border:1px solid #CDE4DC;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--pine-deep);flex:0 0 50px}
+.file-card .fn{font-weight:700;font-size:14.5px}
+.file-card .fd{font-size:12.5px;color:var(--muted);margin:2px 0 8px}
+
+/* terminal app */
+.term{background:#142019;color:#D9E5DE;font-family:var(--mono);font-size:13px;line-height:1.75;height:100%;display:flex;flex-direction:column}
+.term-out{flex:1;overflow-y:auto;padding:16px 18px;white-space:pre-wrap;word-break:break-word}
+.term-out .p{color:#6FBFA6}
+.term-out .c{color:#E8C77D}
+.term-out .dim{color:#7C8F85}
+.term-line{display:flex;gap:8px;padding:10px 18px;border-top:1px solid #23362C}
+.term-line .ps{color:#6FBFA6}
+.term-line input{flex:1;background:none;border:none;color:#D9E5DE;font-family:var(--mono);font-size:13px;outline:none}
+
+/* contact app */
+.c-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line);font-size:14px}
+.c-row:last-of-type{border-bottom:none}
+.c-row .k{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.c-row .v{font-weight:600}
+
+/* welcome */
+.wel-tips{margin:16px 0;display:flex;flex-direction:column;gap:10px}
+.wel-tip{display:flex;gap:12px;font-size:13.5px;color:var(--body);align-items:baseline}
+.wel-tip .ico{flex:0 0 22px;text-align:center}
+
+/* icons */
+.dicon{color:var(--ink)}
+.dicon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.wel-tip .ico svg{width:17px;height:17px;stroke:var(--pine);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
+
+/* experience app */
+.xtl{position:relative;margin-top:6px}
+.xtl::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--pine),var(--line));border-radius:2px}
+.xrole{position:relative;padding:0 0 30px 36px}
+.xrole:last-child{padding-bottom:0}
+.xdot{position:absolute;left:0;top:4px;width:16px;height:16px;border-radius:50%;background:var(--card);border:3px solid var(--pine)}
+.xdate{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.06em}
+.xtitle{font-family:var(--disp);font-weight:600;font-size:17.5px;margin:4px 0 1px}
+.xorg{color:var(--pine);font-weight:600;font-size:13px}
+.xblurb{color:var(--body);font-size:13.5px;margin-top:6px;max-width:560px}
+.xproj{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:15px 17px;margin-top:12px;box-shadow:var(--sh-sm)}
+.xproj-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.xproj-t{font-weight:700;font-size:14px}
+.xproj .one{font-size:13px;color:var(--body);margin-top:6px}
+.xmore{background:none;border:none;color:var(--pine);font-size:12.5px;font-weight:600;padding:0;margin-top:9px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.xdetail{display:none;margin-top:12px}
+.xdetail.show{display:block}
+.pj-soon{padding:14px 16px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.7}
+
+/* ============ MOBILE ============ */
+@media(max-width:740px){
+  #dock{overflow-x:auto}
+  .window{inset:0 !important;width:auto !important;height:auto !important;border-radius:0;min-width:0;border:none}
+  .window .rs,.window .dot.max{display:none}
+  .titlebar{cursor:default}
+  :root{--dockh:78px}
+}
+@media (prefers-reduced-motion:reduce){
+  .window.open{animation:none}
+  .dicon.bounce{animation:none}
+  .pulse{animation:none}
+  .ring .fgc{transition:none}
+  #boot .boot-fill{transition:none}
+}
+</style>
+</head>
+<body class="dark">
+
+<noscript><div style="padding:40px;max-width:640px;margin:0 auto">
+<h1>Shubh Pathak</h1><p>AI systems &amp; data platforms engineer at UBS Investment Banking, Pune. 8,000+ documents auto-reviewed monthly · 200+ hours saved · 96% model accuracy.</p>
+<p>Email: shubhpathakpro@gmail.com · <a href="https://www.linkedin.com/in/shubhpathak0614">LinkedIn</a> · <a href="https://github.com/shubh0614">GitHub</a></p>
+<p><a href="assets/Shubh_Resume_AI_Engineer.pdf">Résumé (AI/ML)</a> · <a href="assets/Shubh_Resume_Data_Analyst.pdf">Résumé (Analytics)</a></p>
+<p>This portfolio is an interactive operating system — enable JavaScript to boot it.</p>
+</div></noscript>
+
+<!-- BOOT -->
+<div id="boot" role="status" aria-label="ShubhOS is starting">
+  <div class="boot-inner">
+    <div class="boot-logo">❖</div>
+    <div class="boot-name">ShubhOS</div>
+    <div class="boot-sub">A PORTFOLIO YOU CAN OPERATE</div>
+    <div class="boot-bar"><div class="boot-fill" id="bootFill"></div></div>
+    <button class="boot-skip" id="bootSkip">skip</button>
+  </div>
+</div>
+
+<!-- MENUBAR -->
+<div id="menubar">
+  <div class="mb-left"><span class="mb-logo">❖ ShubhOS</span><span class="mb-app" id="mbApp">Finder</span></div>
+  <div class="mb-right">
+    <a class="hideS" href="https://github.com/shubh0614" target="_blank" rel="noopener">GitHub</a>
+    <a class="hideS" href="https://www.linkedin.com/in/shubhpathak0614" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="mailto:shubhpathakpro@gmail.com">✉</a>
+    <button id="themeBtn" aria-label="Switch to light mode" title="Dark / light mode">☀️</button>
+    <span id="clock"></span>
+  </div>
+</div>
+
+<!-- DESKTOP -->
+<div id="desktop">
+  <canvas id="wall" aria-hidden="true"></canvas>
+  <div class="desk-hint" id="deskHint">drag the windows · try the Terminal · everything is clickable</div>
+
+  <!-- WELCOME -->
+  <section class="window" id="win-welcome" data-app="welcome" data-x="c" data-y="c" data-w="520" data-h="470" aria-label="Welcome window">
+    <div class="titlebar"><div class="dots"><button class="dot close" aria-label="Close"></button><button class="dot min" aria-label="Minimize"></button><button class="dot max" aria-label="Maximize"></button></div><span class="wtitle">Welcome</span></div>
+    <div class="wbody">
+      <h3 class="app-h">Welcome to <em>ShubhOS.</em></h3>
+      <p class="app-sub">I'm Shubh Pathak — I build AI systems and data platforms at UBS Investment Banking. Instead of telling you that on a long page, I built you a small operating system. Everything here works:</p>
+      <div class="wel-tips">
+        <div class="wel-tip"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="7.5" width="17" height="12.5" rx="2"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M3.5 12.5h17"/></svg></span><span><b>Experience</b> — my work at UBS, before &amp; after</span></div>
+        <div class="wel-tip"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="6" r="2.2"/><circle cx="18.5" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.4"/><path d="M7.4 7.6l3.5 8M16.6 7.6l-3.5 8M7.7 6h8.6"/></svg></span><span><b>Neural Lab</b> — train a real neural network, live</span></div>
+        <div class="wel-tip"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.2"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></span><span><b>Match</b> — paste your JD, get an honest fit report</span></div>
+        <div class="wel-tip"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8l4.2 4L5 16M12.5 16.5H19"/></svg></span><span><b>Terminal</b> — for the engineers (try <span style="font-family:var(--mono);font-size:12px">sudo hire shubh</span>)</span></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+        <button class="btn pine" data-open="experience">See my experience</button>
+        <button class="btn line" data-open="about">Who is Shubh?</button>
+      </div>
+    </div>
+    <div class="rs"></div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="window" id="win-about" data-app="about" data-x="90" data-y="60" data-w="430" data-h="600" aria-label="About window">
+    <div class="titlebar"><div class="dots"><button class="dot close"></button><button class="dot min"></button><button class="dot max"></button></div><span class="wtitle">About Shubh</span></div>
+    <div class="wbody">
+      <div class="avatar">SP</div>
+      <h3 class="app-h">Shubh Pathak</h3>
+      <p class="app-sub" style="margin-bottom:8px"><span class="pulse"></span>Open to new opportunities · Pune, India · happy to relocate</p>
+      <p style="font-size:14px;color:var(--body);margin-bottom:18px">I make enterprise data do the work — AI systems that read 8,000 documents a month, models that decide 4,000 approvals a year, and dashboards that watch 80+ systems. Built over 2.5 years at one of the world's largest banks, from intern to owning a generative AI platform end-to-end.</p>
+      <div class="mono-lbl" style="margin-bottom:6px">System specifications</div>
+      <div class="spec"><span class="k">OS</span><span class="v">ShubhOS 3.0 (human, reliable)</span></div>
+      <div class="spec"><span class="k">Processor</span><span class="v">Python · SQL · DAX</span></div>
+      <div class="spec"><span class="k">Graphics</span><span class="v">Power BI · Microsoft Fabric</span></div>
+      <div class="spec"><span class="k">AI accelerator</span><span class="v">Azure OpenAI · LangGraph · TensorFlow</span></div>
+      <div class="spec"><span class="k">Memory</span><span class="v">24 certifications (MS · Google · Oracle)</span></div>
+      <div class="spec"><span class="k">Uptime</span><span class="v">2.5 yrs @ UBS, zero crashes</span></div>
+      <div class="spec"><span class="k">Education</span><span class="v">B.Tech CS, VIT · 8.70 CGPA</span></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+        <button class="btn pine sm" data-open="impact">See impact</button>
+        <button class="btn line sm" data-open="resume">Get résumé</button>
+      </div>
+    </div>
+    <div class="rs"></div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section class="window" id="win-experience" data-app="experience" data-x="120" data-y="60" data-w="740" data-h="620" aria-label="Experience window">
+    <div class="titlebar"><div class="dots"><button class="dot close"></button><button class="dot min"></button><button class="dot max"></button></div><span class="wtitle">Experience — 2.5 yrs @ UBS</span></div>
+    <div class="wbody"><div id="xpMain"></div></div>
+    <div class="rs"></div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="window" id="win-projects" data-app="projects" data-x="150" data-y="80" data-w="790" data-h="560" aria-label="Projects window">
+    <div class="titlebar"><div class="dots"><button class="dot close"></button><button class="dot min"></button><button class="dot max"></button></div><span class="wtitle">Projects — personal builds</span></div>
+    <div class="wbody nopad">
+      <div class="pj-wrap">
+        <div class="pj-side" id="pjSide"></div>
+        <div class="pj-main" id="pjMain"></div>
+      </div>
+    </div>
+    <div class="rs"></div>
+  </section>
+
+  <!-- IMPACT -->
+  <section class="window" id="win-impact" data-app="impact" data-x="200" data-y="110" data-w="660" data-h="470" aria-label="Impact window">
+    <div class="titlebar"><div class="dots"><button class="dot close"></button><button class="dot min"></button><button class="dot max"></button></div><span class="wtitle">Impact Monitor</span></div>
+    <div class="wbody">
+      <h3 class="app-h">Numbers, not adjectives.</h3>
+      <p class="app-sub">Live readout of what my systems handle in production.</p>
+      <div class="imp-grid">
+        <div class="imp"><b><span class="count" data-to="8000">0</span><small>+</small></b><span>documents auto-reviewed every month</span></div>
+        <div class="imp"><b><span class="count" data-to="200">0</span><small>+ hrs</small></b><span>manual work eliminated monthly</span></div>
+        <div class="imp"><b><span class="count" data-to="96">0</span><small>%</small></b><span>accuracy of my approval model</span></div>
+        <div class="imp"><b><span class="count" data-to="4000">0</span><small>+</small></b><span>decisions automated per year</span></div>
+        <div class="imp"><b><span class="count" data-to="80">0</span><small>+</small></b><span>enterprise systems, one view</span></div>
+        <div class="imp"><b><span class="count" data-to="24">0</span></b><span>certifications · MS, Google, Oracle</span></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
+        <span class="delta">14 days → 3 days</span><span class="delta">−67% API calls</span><span class="delta">−70% latency</span><span class="delta">2 FTEs saved</span>
+      </div>
+    </div>
+    <div class="rs"></div>
+  </section>
+
+  <!-- NEURAL LAB -->
+  <section class="window" id="win-lab" data-app="lab" data-x="110" data-y="70" data-w="880" data-h="620" aria-label="Neural Lab window">
+    <div class="titlebar"><div class="dots"><button class="dot close"></button><button class="dot min"></button><button class="dot max"></button></div><span class="wtitle">Neural Lab — train one yourself</span></div>
+    <div class="wbody">
+      <h3 class="app-h">Teach a neural network. <em>Right now.</em></h3>
+      <p class="app-sub">Machine learning is my field: systems that learn from examples. Here's one, written from scratch in this page's source. Drop two kinds of dots, press train, watch it learn.</p>
+      <div class="lab-grid">
+        <div class="lab-card">
+          <canvas id="nnCanvas" aria-label="Interactive training canvas — click to place example points"></canvas>
+          <div class="stat-row">
+            <div class="stat"><b id="stEpoch">0</b>epochs</div>
+            <div class="stat"><b id="stLoss">—</b>loss</div>
+            <div class="stat"><b id="stAcc">—</b>accuracy</div>
+          </div>
+        </div>
+        <div>
+          <div class="lab-block">
+            <h4>1 · Give it examples</h4>
+            <div class="cls-row">
+              <button class="cls on" data-c="1"><span class="sw"></span>Green dots</button>
+              <button class="cls" data-c="0"><span class="sw"></span>Gold dots</button>
+            </div>
+            <p class="lab-note" style="margin-top:10px">Click the canvas to place dots — or load a pattern:</p>
+            <div class="preset-row" style="margin-top:8px">
+              <button class="preset" data-p="blobs">two groups</button>
+              <button class="preset" data-p="circle">circle</button>
+              <button class="preset" data-p="spiral">spiral (hard)</button>
+            </div>
+          </div>
+          <div class="lab-block">
+            <h4>2 · Let it learn</h4>
+            <div class="lab-actions">
+              <button class="btn pine sm" id="trainBtn">Train the network</button>
+              <button class="btn line sm" id="resetBtn">Reset brain</button>
+              <button class="btn line sm" id="clearBtn">Clear</button>
+            </div>
+            <p class="lab-note" style="margin-top:10px">The shaded regions are the network's belief. Watch it bend around your dots.</p>
+          </div>
+          <div class="lab-block">
+            <h4>Under the hood</h4>
+            <p class="lab-note">Two hidden layers (12 + 12 neurons), hand-written backpropagation, ~60 lines of dependency-free JavaScript. Like TensorFlow Playground, it also sees simple transformations of your coordinates (sin, x·y, r²) — that's what lets it crack the spiral. The same idea, scaled a few billion times, powers what I build at work.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rs"></div>
+  </section>
+
+  <!-- MATCH -->
+  <section class="window" id="win-match" data-app="match" data-x="170" data-y="95" data-w="700" data-h="600" aria-label="Match window">
+    <div class="titlebar"><div class="dots"><button class="dot close"></button><button class="dot min"></button><button class="dot max"></button></div><span class="wtitle">Match — JD screener</span></div>
+    <div class="wbody">
+      <h3 class="app-h">Paste your job description.<br>I'll do the <em>screening.</em></h3>
+      <p class="app-sub">My day job is building systems that read documents and check them against requirements — so here's one that reads yours. Runs entirely in your browser; nothing is uploaded or stored.</p>
+      <textarea id="jdText" placeholder="Paste the job description here — responsibilities, requirements, all of it..." aria-label="Job description"></textarea>
+      <div class="m-actions">
+        <button class="btn pine" id="matchBtn">Analyze match</button>
+        <span class="m-samples">or try a sample: <button data-sample="ai">AI/ML role</button> · <button data-sample="da">Analytics role</button></span>
+      </div>
+      <div id="m-result" aria-live="polite">
+        <div class="score-wrap">
+          <div class="ring">
+            <svg width="96" height="96" viewBox="0 0 96 96"><circle class="bgc" cx="48" cy="48" r="42"></circle><circle class="fgc" id="ringFg" cx="48" cy="48" r="42"></circle></svg>
+            <div class="pct" id="ringPct">0%</div>
+          </div>
+          <div class="score-text">
+            <div class="verdict" id="mVerdict"></div>
+            <div class="vsub" id="mVsub"></div>
+            <div class="m-resume-rec" id="mResume"></div>
+          </div>
+        </div>
+        <div class="m-list" id="mList"></div>
+        <p class="m-more" id="mMore"></p>
+      </div>
+    </div>
+    <div class="rs"></div>
+  </section>
+
+  <!-- RESUME -->
+  <section class="window" id="win-resume" data-app="resume" data-x="240" data-y="120" data-w="540" data-h="430" aria-label="Resume window">
+    <div class="titlebar"><div class="dots"><button class="dot close"></button><button class="dot min"></button><button class="dot max"></button></div><span class="wtitle">Résumé — 2 files</span></div>
+    <div class="wbody">
+      <h3 class="app-h">Two lenses, one engineer.</h3>
+      <p class="app-sub">Same career, framed for different readers. Take whichever fits your role — or both.</p>
+      <div class="file-card">
+        <div class="file-ico">PDF</div>
+        <div style="flex:1">
+          <div class="fn">Shubh_Resume_AI_Engineer.pdf</div>
+          <div class="fd">LLM platform, contextual routing, async pipelines, Ada</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn pine sm" href="assets/Shubh_Resume_AI_Engineer.pdf" download>Download</a><a class="btn line sm" href="assets/Shubh_Resume_AI_Engineer.pdf" target="_blank" rel="noopener">Preview</a></div>
+        </div>
+      </div>
+      <div class="file-card">
+        <div class="file-ico">PDF</div>
+        <div style="flex:1">
+          <div class="fn">Shubh_Resume_Data_Analyst.pdf</div>
+          <div class="fd">INSPIRE dashboard, ETL pipelines, BI delivery, stakeholder work</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn pine sm" href="assets/Shubh_Resume_Data_Analyst.pdf" download>Download</a><a class="btn line sm" href="assets/Shubh_Resume_Data_Analyst.pdf" target="_blank" rel="noopener">Preview</a></div>
+        </div>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted)">Not sure which? Open <b>Match</b>, paste your JD, and it'll recommend one.</p>
+    </div>
+    <div class="rs"></div>
+  </section>
+
+  <!-- TERMINAL -->
+  <section class="window" id="win-terminal" data-app="terminal" data-x="260" data-y="140" data-w="660" data-h="450" aria-label="Terminal window">
+    <div class="titlebar"><div class="dots"><button class="dot close"></button><button class="dot min"></button><button class="dot max"></button></div><span class="wtitle">Terminal — shubh@portfolio</span></div>
+    <div class="wbody nopad">
+      <div class="term">
+        <div class="term-out" id="termOut"></div>
+        <div class="term-line"><span class="ps">shubh@portfolio:~$</span><input id="termIn" autocomplete="off" spellcheck="false" aria-label="Terminal input"></div>
+      </div>
+    </div>
+    <div class="rs"></div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="window" id="win-contact" data-app="contact" data-x="300" data-y="150" data-w="500" data-h="450" aria-label="Contact window">
+    <div class="titlebar"><div class="dots"><button class="dot close"></button><button class="dot min"></button><button class="dot max"></button></div><span class="wtitle">Contact</span></div>
+    <div class="wbody">
+      <h3 class="app-h">Your data has work to do.<br><em>Let's talk.</em></h3>
+      <p class="app-sub">Exploring roles where enterprise data meets automation — India or anywhere in the world.</p>
+      <div class="c-row"><span class="k">Email</span><a class="v" href="mailto:shubhpathakpro@gmail.com">shubhpathakpro@gmail.com</a></div>
+      <div class="c-row"><span class="k">Phone</span><a class="v" href="tel:+919569918724">+91 95699 18724</a></div>
+      <div class="c-row"><span class="k">LinkedIn</span><a class="v" href="https://www.linkedin.com/in/shubhpathak0614" target="_blank" rel="noopener">in/shubhpathak0614</a></div>
+      <div class="c-row"><span class="k">GitHub</span><a class="v" href="https://github.com/shubh0614" target="_blank" rel="noopener">shubh0614</a></div>
+      <div class="c-row"><span class="k">Location</span><span class="v">Pune, India · open to relocation</span></div>
+      <a class="btn pine" style="margin-top:18px" href="mailto:shubhpathakpro@gmail.com?subject=Let%27s%20talk%20—%20found%20you%20via%20ShubhOS">Email me now</a>
+    </div>
+    <div class="rs"></div>
+  </section>
+</div>
+
+<!-- DOCK -->
+<div id="dock" role="toolbar" aria-label="Dock">
+  <button class="dicon" data-open="about"><span class="tip"><b>About Shubh</b><i>who I am · system specs</i></span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.5c0-4 3.4-6.3 7.5-6.3s7.5 2.3 7.5 6.3"/></svg><span class="run"></span></button>
+  <button class="dicon" data-open="experience"><span class="tip"><b>Experience</b><i>2.5 yrs at UBS — roles &amp; work systems</i></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="7.5" width="17" height="12.5" rx="2"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M3.5 12.5h17"/></svg><span class="run"></span></button>
+  <button class="dicon" data-open="projects"><span class="tip"><b>Projects</b><i>personal builds — Ada &amp; this OS</i></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7a2 2 0 0 1 2-2h3.8l2 2.2h7.2a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M10.2 12.2l-1.9 1.9 1.9 1.9M13.8 12.2l1.9 1.9-1.9 1.9"/></svg><span class="run"></span></button>
+  <button class="dicon" data-open="impact"><span class="tip"><b>Impact Monitor</b><i>the numbers my systems produce</i></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-7M12 20V5.5M19 20v-10"/></svg><span class="run"></span></button>
+  <button class="dicon" data-open="lab"><span class="tip"><b>Neural Lab</b><i>train a real neural network, live</i></span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="6" r="2.2"/><circle cx="18.5" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.4"/><path d="M7.4 7.6l3.5 8M16.6 7.6l-3.5 8M7.7 6h8.6"/></svg><span class="run"></span></button>
+  <button class="dicon" data-open="match"><span class="tip"><b>Match</b><i>paste your JD, get an honest fit report</i></span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.2"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg><span class="run"></span></button>
+  <div class="dock-sep"></div>
+  <button class="dicon" data-open="resume"><span class="tip"><b>R&eacute;sum&eacute;</b><i>two PDFs — pick your lens</i></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13.5 3.5V9H19M9 13.5h6M9 17h6"/></svg><span class="run"></span></button>
+  <button class="dicon" data-open="terminal"><span class="tip"><b>Terminal</b><i>for engineers — try sudo hire shubh</i></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8l4.2 4L5 16M12.5 16.5H19"/></svg><span class="run"></span></button>
+  <button class="dicon" data-open="contact"><span class="tip"><b>Contact</b><i>email · phone · LinkedIn · GitHub</i></span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M4.5 7.5l7.5 5.5 7.5-5.5"/></svg><span class="run"></span></button>
+</div>
+
+<script>
+/* ================= OS CORE ================= */
+var PRM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var isMobile = function(){ return innerWidth < 740; };
+var zTop = 10;
+var APPNAMES = {welcome:'Welcome',about:'About Shubh',experience:'Experience',projects:'Projects',impact:'Impact Monitor',lab:'Neural Lab',match:'Match',resume:'Résumé',terminal:'Terminal',contact:'Contact'};
+var opened = {};   // app -> bool (ever opened, for lazy init)
+var inits = {};    // app -> init fn run on first open
+
+function winEl(app){ return document.getElementById('win-' + app); }
+function dockIcon(app){ return document.querySelector('.dicon[data-open="' + app + '"]'); }
+
+function focusWin(w){
+  zTop += 1; w.style.zIndex = zTop;
+  document.getElementById('mbApp').textContent = APPNAMES[w.dataset.app] || 'Finder';
+}
+function openApp(app){
+  var w = winEl(app); if (!w) return;
+  var d = dockIcon(app);
+  if (d && !PRM){ d.classList.remove('bounce'); void d.offsetWidth; d.classList.add('bounce'); }
+  if (!w.classList.contains('open')){
+    // position
+    if (!isMobile()){
+      var desk = document.getElementById('desktop');
+      var dw = desk.clientWidth, dh = desk.clientHeight;
+      var W = Math.min(+w.dataset.w, dw - 20), H = Math.min(+w.dataset.h, dh - 100);
+      w.style.width = W + 'px'; w.style.height = H + 'px';
+      var x = w.dataset.x === 'c' ? (dw - W) / 2 : Math.min(+w.dataset.x, dw - W - 10);
+      var y = w.dataset.y === 'c' ? Math.max(10,(dh - H) / 2 - 30) : Math.min(+w.dataset.y, dh - H - 90);
+      w.style.left = Math.max(6, x) + 'px'; w.style.top = Math.max(6, y) + 'px';
+    }
+    w.classList.add('open');
+    if (d) d.classList.add('open');
+    if (!opened[app]){ opened[app] = true; if (inits[app]) inits[app](); }
+  }
+  w.style.display = 'flex';
+  focusWin(w);
+  var hint = document.getElementById('deskHint'); if (hint) hint.classList.add('away');
+  if (app === 'terminal'){ var ti = document.getElementById('termIn'); if (ti) setTimeout(function(){ ti.focus(); }, 60); }
+}
+function closeApp(app){
+  var w = winEl(app); w.classList.remove('open','max'); w.style.display = 'none';
+  var d = dockIcon(app); if (d) d.classList.remove('open');
+}
+function minApp(app){ var w = winEl(app); w.style.display = 'none'; }
+
+document.querySelectorAll('.window').forEach(function(w){
+  var app = w.dataset.app;
+  var bar = w.querySelector('.titlebar');
+  w.addEventListener('pointerdown', function(){ focusWin(w); });
+  w.querySelector('.dot.close').addEventListener('click', function(e){ e.stopPropagation(); closeApp(app); });
+  w.querySelector('.dot.min').addEventListener('click', function(e){ e.stopPropagation(); minApp(app); });
+  w.querySelector('.dot.max').addEventListener('click', function(e){ e.stopPropagation(); w.classList.toggle('max'); });
+  bar.addEventListener('dblclick', function(){ if(!isMobile()) w.classList.toggle('max'); });
+  // drag
+  bar.addEventListener('pointerdown', function(ev){
+    if (ev.target.classList.contains('dot') || isMobile() || w.classList.contains('max')) return;
+    var sx = ev.clientX - w.offsetLeft, sy = ev.clientY - w.offsetTop;
+    var desk = document.getElementById('desktop');
+    function mv(e){
+      var nx = Math.min(Math.max(e.clientX - sx, -w.offsetWidth + 80), desk.clientWidth - 40);
+      var ny = Math.min(Math.max(e.clientY - sy, 0), desk.clientHeight - 50);
+      w.style.left = nx + 'px'; w.style.top = ny + 'px';
+    }
+    function up(){ removeEventListener('pointermove', mv); removeEventListener('pointerup', up); }
+    addEventListener('pointermove', mv); addEventListener('pointerup', up);
+  });
+  // resize
+  var rs = w.querySelector('.rs');
+  if (rs) rs.addEventListener('pointerdown', function(ev){
+    ev.preventDefault(); ev.stopPropagation();
+    if (isMobile() || w.classList.contains('max')) return;
+    var sw = w.offsetWidth - ev.clientX, sh = w.offsetHeight - ev.clientY;
+    function mv(e){
+      w.style.width = Math.max(300, sw + e.clientX) + 'px';
+      w.style.height = Math.max(200, sh + e.clientY) + 'px';
+    }
+    function up(){ removeEventListener('pointermove', mv); removeEventListener('pointerup', up); }
+    addEventListener('pointermove', mv); addEventListener('pointerup', up);
+  });
+});
+document.querySelectorAll('[data-open]').forEach(function(b){
+  if (b.classList.contains('dicon')){
+    b.addEventListener('click', function(){
+      var app = b.dataset.open, w = winEl(app);
+      if (w.classList.contains('open') && w.style.display !== 'none' && w.style.zIndex == zTop) minApp(app);
+      else openApp(app);
+    });
+  } else {
+    b.addEventListener('click', function(){ openApp(b.dataset.open); });
+  }
+});
+addEventListener('keydown', function(e){
+  if (e.key === 'Escape'){
+    var top = null, tz = -1;
+    document.querySelectorAll('.window').forEach(function(w){
+      if (w.classList.contains('open') && w.style.display !== 'none' && +w.style.zIndex > tz){ tz = +w.style.zIndex; top = w; }
+    });
+    if (top && top.dataset.app !== 'terminal') closeApp(top.dataset.app);
+  }
+});
+
+/* clock */
+function tick(){
+  var d = new Date();
+  document.getElementById('clock').textContent = d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) + '  ' + d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+tick(); setInterval(tick, 20000);
+
+/* boot */
+(function(){
+  var boot = document.getElementById('boot');
+  function done(){
+    boot.classList.add('away');
+    setTimeout(function(){ boot.remove(); openApp('welcome'); }, PRM ? 0 : 550);
+  }
+  document.getElementById('bootSkip').addEventListener('click', done);
+  if (PRM){ done(); return; }
+  requestAnimationFrame(function(){ document.getElementById('bootFill').style.width = '100%'; });
+  setTimeout(done, 1700);
+})();
+
+/* ================= WALLPAPER (living network) ================= */
+(function(){
+  var cv = document.getElementById('wall'), desk = document.getElementById('desktop');
+  var ctx = cv.getContext('2d');
+  var layers=[],edges=[],pulses=[],W=0,H=0,mx=-9999,my=-9999,tPrev=0,autoT=0;
+  function netC(a){return 'rgba('+(document.body.classList.contains('dark')?'126,205,180':'31,111,92')+','+a+')';}
+  function golC(a){return 'rgba('+(document.body.classList.contains('dark')?'226,184,106':'192,145,58')+','+a+')';}
+  function build(){
+    var DPR = Math.min(devicePixelRatio||1, 2);
+    W = desk.clientWidth; H = desk.clientHeight;
+    cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+    layers=[];edges=[];pulses=[];
+    var counts = W<740 ? [3,4,4,3] : [4,6,7,6,4];
+    var x0=W*0.04, x1=W*0.96, yT=H*0.06, yB=H*0.94;
+    for (var i=0;i<counts.length;i++){
+      var col=[];
+      for (var j=0;j<counts[i];j++)
+        col.push({x:x0+(x1-x0)*i/(counts.length-1), y:yT+(yB-yT)*((j+0.5)/counts[i]), r:2.5+Math.random()*2, ph:Math.random()*6.283});
+      layers.push(col);
+    }
+    for (var l=0;l<layers.length-1;l++)
+      for (var a=0;a<layers[l].length;a++)
+        for (var b=0;b<layers[l+1].length;b++)
+          edges.push({a:layers[l][a], b:layers[l+1][b], l:l});
+  }
+  function spawn(li,node){
+    var c=0;
+    for (var i=0;i<edges.length && c<3;i++){
+      var e=edges[i];
+      if (e.l===li && e.a===node && Math.random()<0.75 && pulses.length<40){ pulses.push({e:e,t:0}); c++; }
+    }
+  }
+  function drawStatic(){
+    ctx.clearRect(0,0,W,H);
+    edges.forEach(function(e){ ctx.strokeStyle=netC(0.05); ctx.beginPath(); ctx.moveTo(e.a.x,e.a.y); ctx.lineTo(e.b.x,e.b.y); ctx.stroke(); });
+    layers.forEach(function(col){ col.forEach(function(n){ ctx.fillStyle=netC(0.22); ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,6.283); ctx.fill(); }); });
+  }
+  function frame(ts){
+    requestAnimationFrame(frame);
+    if (document.hidden) return;
+    var dt = Math.min(0.05,(ts-tPrev)/1000||0.016); tPrev = ts;
+    ctx.clearRect(0,0,W,H);
+    autoT -= dt;
+    if (autoT<=0){ var L0=layers[0]; spawn(0, L0[(Math.random()*L0.length)|0]); autoT = 1.1+Math.random()*1.6; }
+    for (var i=0;i<edges.length;i++){
+      var e=edges[i];
+      var ddx=(e.a.x+e.b.x)/2-mx, ddy=(e.a.y+e.b.y)/2-my;
+      var al = 0.04 + Math.max(0,1-(ddx*ddx+ddy*ddy)/60000)*0.13;
+      ctx.strokeStyle=netC(al.toFixed(3));
+      ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(e.a.x,e.a.y); ctx.lineTo(e.b.x,e.b.y); ctx.stroke();
+    }
+    for (var p=pulses.length-1;p>=0;p--){
+      var pu=pulses[p]; pu.t+=dt*1.3;
+      if (pu.t>=1){ var nl=pu.e.l+1; pulses.splice(p,1); if (nl<layers.length-1) spawn(nl,pu.e.b); continue; }
+      var x=pu.e.a.x+(pu.e.b.x-pu.e.a.x)*pu.t, y=pu.e.a.y+(pu.e.b.y-pu.e.a.y)*pu.t;
+      ctx.fillStyle=golC(0.13); ctx.beginPath(); ctx.arc(x,y,6,0,6.283); ctx.fill();
+      ctx.fillStyle=golC(0.55); ctx.beginPath(); ctx.arc(x,y,2.2,0,6.283); ctx.fill();
+    }
+    for (var li=0;li<layers.length;li++) for (var ni=0;ni<layers[li].length;ni++){
+      var n=layers[li][ni];
+      var dx=n.x-mx, dy=n.y-my, near=Math.max(0,1-(dx*dx+dy*dy)/30000);
+      ctx.fillStyle=netC((0.18+near*0.4).toFixed(3));
+      ctx.beginPath(); ctx.arc(n.x,n.y,n.r+Math.sin(ts/800+n.ph)*0.6+near*2,0,6.283); ctx.fill();
+    }
+  }
+  build();
+  if (PRM){ drawStatic(); }
+  else {
+    requestAnimationFrame(frame);
+    desk.addEventListener('pointermove', function(ev){ var r=desk.getBoundingClientRect(); mx=ev.clientX-r.left; my=ev.clientY-r.top; });
+  }
+  var rt; addEventListener('resize', function(){ clearTimeout(rt); rt=setTimeout(function(){ build(); if (PRM) drawStatic(); }, 200); });
+  addEventListener('oschrome', function(){ if (PRM) drawStatic(); });
+})();
+</script>
+<script>
+/* ================= APPS ================= */
+
+/* ---- Experience & Projects data ---- */
+/* ============================================================
+   EXPERIENCE — work roles & the systems shipped in each.
+   To add a new role: copy a role object; to add a work project
+   inside a role: copy an object in its `projects` array.
+   ============================================================ */
+var EXPERIENCE = [
+ {date:'NOV 2025 — PRESENT', title:'AI Engineer', org:'UBS · Investment Banking Compliance',
+  blurb:'Own a generative AI compliance platform end-to-end; present KRI dashboards to Investment Bank leadership.',
+  projects:[
+   {t:'Teaching AI to review client documents', delta:'−200 hrs / month',
+    one:'8,000+ documents reviewed automatically each month, with page-level evidence.',
+    d:'A compliance team must check every client-facing document and email against dozens of policies. I built a platform with two engines — one parses PDFs, decks and Word files with Azure OpenAI vision checks; one reviews written communications through grouped LLM policy checks — exporting audit-ready findings with page references. A contextual routing strategy sends each chunk only to the checks that matter; parallelised inference keeps it fast.',
+    b:'A 6-person team reading thousands of documents line by line — 200+ hours of manual review, every month.',
+    a:'<b>8,000+ documents reviewed automatically each month</b> — with 67% fewer API calls and 70% lower latency than the naive approach.',
+    tags:['Python','Azure OpenAI','LLM orchestration','NLP','async multithreading','Power BI']}
+  ]},
+ {date:'AUG 2024 — OCT 2025', title:'Data Analyst → ML Engineer', org:'UBS · Technology Services',
+  blurb:'Shipped INSPIRE, the approval-prediction model, vendor ETL pipelines and enterprise alerting to 100+ stakeholders.',
+  projects:[
+   {t:'A model that approves IT requests by itself', delta:'14 days → 3 days',
+    one:'4,000+ decisions a year automated at 96% accuracy.',
+    d:'Hardware requests crawled through a 14-day approval queue. I trained a predictive model on 15,000 historical records of server utilisation (CPU, memory, disk), wired vendor APIs from HPE, Dell and Lenovo into PostgreSQL through Azure Data Factory pipelines, and layered rule-based recommendations on top.',
+    b:'Every request waited on a human decision. Average wait: 14 days. ~4,000 decisions a year made by hand.',
+    a:'<b>96% of decisions automated correctly</b> — approvals land in under 3 days, an 80% reduction.',
+    tags:['machine learning','Azure Data Factory','PostgreSQL','vendor APIs','Python']},
+   {t:'One dashboard instead of eighty systems', delta:'−40% manual effort',
+    one:'80+ systems unified · 2 FTEs of repetitive work eliminated.',
+    d:'Leadership pulled infrastructure data from 80+ separate systems by hand. I built INSPIRE — a Power BI platform unifying all of them into a single live view — then shipped Solution Designer Studio so teams assemble their own reusable reports, and automated alerting to 100+ stakeholders via Power Automate.',
+    b:'Analysts copy-pasting from 80+ systems; reporting effort worth 2 full-time employees; answers took days.',
+    a:'<b>One live view across the estate</b> — 40% less gathering, 60% faster assessments, real-time alerts to 100+ stakeholders.',
+    tags:['Power BI','DAX','Power Automate','data modelling','stakeholder management']}
+  ]},
+ {date:'JAN 2024 — JUL 2024', title:'Data Analyst Intern', org:'UBS · CDIO Technology',
+  blurb:'Migrated compliance reporting from Tableau to Power BI; built a failure-monitoring dashboard that cut investigation time from 2–3 days to under 6 hours.',
+  projects:[]},
+ {date:'2022 — 2023', title:'Research & open source', org:'Spartificial · Omdena',
+  blurb:'1st place, AI for Lunar Exploration; one of 60 contributors on an ML greenhouse-control system. B.Tech CS, VIT — 8.70 CGPA.',
+  projects:[]}
+];
+
+/* ============================================================
+   PROJECTS — personal builds only.
+   ➕ TO ADD A NEW PROJECT, copy this template into the array:
+   {t:'Project name', org:'PERSONAL · 2026',
+    d:'What it is and how it works.',
+    b:'The before state.',
+    a:'<b>The after state</b> — the outcome.',
+    delta:'headline metric', tags:['tech','tech'],
+    link:'https://github.com/shubh0614/...'}
+   ============================================================ */
+var PROJECTS = [
+ {t:'Ada — an AI that builds AI', org:'PERSONAL · github.com/shubh0614/ADA-MLFlow',
+  d:'Nine coordinated agents that take a raw dataset and walk the entire machine-learning workflow on their own — profiling, feature engineering, model selection, training, deployment — with a human approval gate and self-correcting code execution that retries on failure. FastAPI + React interface, CI/CD integrated.',
+  b:'Building an ML model end-to-end: days of notebooks, boilerplate and babysitting.',
+  a:'<b>Dataset in, deployed model out</b> — the full pipeline automated behind a web interface.',
+  delta:'9 agents', tags:['LangGraph','multi-agent systems','FastAPI','React','OpenAI API','CI/CD'],
+  link:'https://github.com/shubh0614/ADA-MLFlow'},
+ {t:'ShubhOS — this very website', org:'PERSONAL · YOU ARE INSIDE IT',
+  d:'A portfolio that behaves like an operating system: draggable windows, a dock, a working terminal, a JD-matching engine, and a neural network you can train — hand-built in one dependency-free HTML file. No frameworks, no build step, hand-written backpropagation.',
+  b:'Portfolios are PDFs you scroll once and forget.',
+  a:'<b>A portfolio you operate</b> — visitors boot in, open apps, teach a model, and remember the candidate.',
+  delta:'1 file · 0 dependencies', tags:['vanilla JS','canvas','UX design','CSS architecture'],
+  link:'https://github.com/shubh0614'}
+];
+inits.projects = function(){
+  var side = document.getElementById('pjSide'), main = document.getElementById('pjMain');
+  side.innerHTML = PROJECTS.map(function(p,i){
+    return '<button class="pj-item'+(i===0?' on':'')+'" data-i="'+i+'">'+p.t+'<small>'+p.org+'</small></button>';
+  }).join('') + '<div class="pj-soon">more builds brewing —<br><a href="https://github.com/shubh0614" target="_blank" rel="noopener">github.com/shubh0614 ↗</a></div>';
+  function show(i){
+    var p = PROJECTS[i];
+    side.querySelectorAll('.pj-item').forEach(function(b,bi){ b.classList.toggle('on', bi===i); });
+    main.innerHTML =
+      '<div class="mono-lbl">'+p.org+'</div>'+
+      '<h3 class="app-h" style="margin-top:6px">'+p.t+'</h3>'+
+      '<span class="delta">'+p.delta+'</span>'+
+      '<p style="font-size:14px;color:var(--body);margin-top:14px">'+p.d+'</p>'+
+      '<div class="ba"><div class="ba-box ba-before"><span class="tag">BEFORE</span>'+p.b+'</div>'+
+      '<div class="ba-box ba-after"><span class="tag">AFTER</span>'+p.a+'</div></div>'+
+      '<div style="display:flex;gap:7px;flex-wrap:wrap">'+p.tags.map(function(t){return '<span class="chip">'+t+'</span>';}).join('')+'</div>'+
+      (p.link ? '<p style="margin-top:14px"><a class="btn line sm" href="'+p.link+'" target="_blank" rel="noopener">View on GitHub ↗</a></p>' : '');
+    main.scrollTop = 0;
+  }
+  side.addEventListener('click', function(e){
+    var b = e.target.closest('.pj-item'); if (b) show(+b.dataset.i);
+  });
+  show(0);
+};
+
+/* ---- Experience app ---- */
+inits.experience = function(){
+  var el = document.getElementById('xpMain');
+  el.innerHTML = '<h3 class="app-h">Four steps up in <em>2.5 years.</em></h3>'+
+    '<p class="app-sub">Same employer, steadily bigger problems — intern dashboards to AI systems an investment bank relies on. The systems I shipped in each role are below; personal builds live in <b>Projects</b>.</p>'+
+    '<div class="xtl">'+EXPERIENCE.map(function(r,ri){
+      return '<div class="xrole"><div class="xdot"></div>'+
+        '<div class="xdate">'+r.date+'</div>'+
+        '<div class="xtitle">'+r.title+'</div>'+
+        '<div class="xorg">'+r.org+'</div>'+
+        '<p class="xblurb">'+r.blurb+'</p>'+
+        (r.projects||[]).map(function(p,pi){
+          var id='xpd-'+ri+'-'+pi;
+          return '<div class="xproj"><div class="xproj-top"><span class="xproj-t">'+p.t+'</span><span class="delta">'+p.delta+'</span></div>'+
+            '<div class="one">'+p.one+'</div>'+
+            '<button class="xmore" data-t="'+id+'">show the before &amp; after</button>'+
+            '<div class="xdetail" id="'+id+'">'+
+              '<p style="font-size:13px;color:var(--body);margin-bottom:10px">'+p.d+'</p>'+
+              '<div class="ba"><div class="ba-box ba-before"><span class="tag">BEFORE</span>'+p.b+'</div>'+
+              '<div class="ba-box ba-after"><span class="tag">AFTER</span>'+p.a+'</div></div>'+
+              '<div style="display:flex;gap:7px;flex-wrap:wrap">'+p.tags.map(function(t){return '<span class="chip">'+t+'</span>';}).join('')+'</div>'+
+            '</div></div>';
+        }).join('')+
+      '</div>';
+    }).join('')+'</div>';
+  el.addEventListener('click', function(e){
+    var b = e.target.closest('.xmore'); if (!b) return;
+    var d = document.getElementById(b.dataset.t);
+    d.classList.toggle('show');
+    b.innerHTML = d.classList.contains('show') ? 'hide details' : 'show the before &amp; after';
+  });
+};
+
+/* ---- Impact counters ---- */
+inits.impact = function(){
+  document.querySelectorAll('#win-impact .count').forEach(function(el){
+    var to = +el.dataset.to, dur = 1400, t0 = performance.now();
+    if (PRM){ el.textContent = to.toLocaleString('en-IN'); return; }
+    (function tk(t){
+      var p = Math.min((t-t0)/dur, 1), e = 1-Math.pow(1-p,3);
+      el.textContent = Math.round(to*e).toLocaleString('en-IN');
+      if (p<1) requestAnimationFrame(tk);
+    })(t0);
+  });
+};
+
+/* ---- Terminal ---- */
+inits.terminal = function(){
+  var out = document.getElementById('termOut'), inp = document.getElementById('termIn');
+  function print(s, cls){ out.innerHTML += (cls?'<span class="'+cls+'">':'') + s + (cls?'</span>':'') + '\n'; out.scrollTop = out.scrollHeight; }
+  function banner(){
+    print('       ❖  ShubhOS 3.0 — portfolio kernel', 'p');
+    print('  ─────────────────────────────────────────', 'dim');
+    print('  user: shubh_pathak     role: AI & data engineer @ UBS');
+    print('  uptime: 2.5 yrs        certs: 24 (MS · Google · Oracle)');
+    print('  throughput: 8,000+ docs/month · 200+ hrs saved/month');
+    print('');
+    print('  type <span class="c">help</span> to see commands.');
+    print('');
+  }
+  var CMDS = {
+    help: function(){ print('commands:', 'p'); print('  whoami      — who is this person\n  experience  — roles at UBS & the systems shipped\n  projects    — personal builds\n  skills      — what I build with\n  certs       — certifications\n  impact      — the numbers\n  contact     — how to reach me\n  open <app>  — open any app (experience, projects, lab, match, resume, contact, impact, about)\n  neofetch    — system card\n  clear       — clean up\n  hire        — you know what this does'); },
+    whoami: function(){ print('Shubh Pathak — I make enterprise data do the work.\nAI systems that read 8,000 docs/month, models deciding 4,000 approvals/year,\ndashboards watching 80+ systems. 2.5 years at UBS, intern → AI engineer.'); },
+    projects: function(){ PROJECTS.forEach(function(p,i){ print((i+1)+'. '+p.t+'  <span class="dim">['+p.delta+']</span>'); }); print('personal builds — work systems live under <span class="c">experience</span>'); },
+    experience: function(){ EXPERIENCE.forEach(function(r){ print(r.title+'  <span class="dim">'+r.org+' · '+r.date+'</span>'); }); print('full stories with before/after: <span class="c">open experience</span>'); },
+    skills: function(){ print('AI/ML:      Python · Azure OpenAI · LLMs · LangGraph · RAG · NLP · TensorFlow · PyTorch\ndata:       Azure Data Factory · PostgreSQL · MS SQL · pandas · FastAPI · ETL\nanalytics:  Power BI · DAX · Microsoft Fabric · Tableau · Alteryx · Power Automate'); },
+    certs: function(){ print('AI-102 Azure AI Engineer · DP-100 Azure Data Scientist · DP-600 Fabric Analytics\nPL-300 Power BI Analyst · TensorFlow Developer (Google) · OCI GenAI Professional\nAlteryx Designer Core ... and 17 more.'); },
+    impact: function(){ print('8,000+ docs auto-reviewed/month   200+ hrs saved/month\n96% model accuracy                4,000+ decisions/year automated\n14 days → 3 days approvals        80+ systems unified'); },
+    contact: function(){ print('email:    shubhpathakpro@gmail.com\nphone:    +91 95699 18724\nlinkedin: in/shubhpathak0614\ngithub:   shubh0614'); },
+    neofetch: function(){ banner(); },
+    clear: function(){ out.innerHTML = ''; },
+    hire: function(){ print('checking candidate availability ......... <span class="p">AVAILABLE</span>\nopening contact channel .................. <span class="p">OK</span>'); setTimeout(function(){ openApp('contact'); }, 500); },
+    date: function(){ print(new Date().toString()); },
+    ls: function(){ print('projects/  skills/  certs/  resume.pdf  hire_me.sh'); }
+  };
+  function run(raw){
+    var line = raw.trim();
+    print('<span class="p">shubh@portfolio:~$</span> ' + line.replace(/</g,'&lt;'));
+    if (!line) return;
+    var parts = line.toLowerCase().split(/\s+/);
+    var cmd = parts[0];
+    if (cmd === 'sudo'){ 
+      if (parts[1] === 'hire'){ print('[sudo] permission granted without password — obviously.', 'dim'); CMDS.hire(); return; }
+      print('sudo: nice try. you already have all the permissions here.', 'dim'); return;
+    }
+    if (cmd === 'open'){
+      var app = parts[1];
+      if (app && winEl(app)){ print('opening ' + app + '…', 'dim'); openApp(app); }
+      else print('usage: open <experience|projects|lab|match|resume|contact|impact|about|terminal>', 'dim');
+      return;
+    }
+    if (cmd === 'cat' && parts[1] && parts[1].indexOf('resume') > -1){ print('binary file — use: <span class="c">open resume</span>', 'dim'); return; }
+    if (cmd === 'echo'){ print(raw.trim().slice(5).replace(/</g,'&lt;')); return; }
+    if (CMDS[cmd]) CMDS[cmd]();
+    else print('command not found: ' + cmd.replace(/</g,'&lt;') + '  — try <span class="c">help</span>', 'dim');
+  }
+  inp.addEventListener('keydown', function(e){
+    if (e.key === 'Enter'){ run(inp.value); inp.value = ''; }
+  });
+  banner();
+};
+
+/* ================= NN CORE (tested) ================= */
+/* NN-CORE-START */
+function nnFeat(x,y){return new Float64Array([x,y,Math.sin(3*x),Math.sin(3*y),x*y,x*x+y*y]);}
+function nnMake(){
+  var sizes=[6,12,12,1],W=[],B=[];
+  for(var l=0;l<sizes.length-1;l++){
+    var rows=sizes[l+1],cols=sizes[l],m=[],s=Math.sqrt(2/cols);
+    for(var r=0;r<rows;r++){var row=new Float64Array(cols);for(var c=0;c<cols;c++)row[c]=(Math.random()*2-1)*s;m.push(row);}
+    W.push(m);B.push(new Float64Array(rows));
+  }
+  return {W:W,B:B};
+}
+function nnForward(net,x,y){
+  var acts=[nnFeat(x,y)];
+  for(var l=0;l<net.W.length;l++){
+    var prev=acts[l],out=new Float64Array(net.W[l].length);
+    for(var j=0;j<out.length;j++){
+      var s=net.B[l][j],row=net.W[l][j];
+      for(var k=0;k<row.length;k++)s+=row[k]*prev[k];
+      out[j]=(l===net.W.length-1)?1/(1+Math.exp(-s)):Math.tanh(s);
+    }
+    acts.push(out);
+  }
+  return acts;
+}
+function nnEpoch(net,pts,lr){
+  var loss=0,order=[],i;
+  for(i=0;i<pts.length;i++)order.push(i);
+  for(i=order.length-1;i>0;i--){var j=(Math.random()*(i+1))|0,t=order[i];order[i]=order[j];order[j]=t;}
+  for(var oi=0;oi<order.length;oi++){
+    var p=pts[order[oi]];
+    var acts=nnForward(net,p.x,p.y);
+    var o=acts[acts.length-1][0],tgt=p.c;
+    loss+=-(tgt*Math.log(o+1e-9)+(1-tgt)*Math.log(1-o+1e-9));
+    var delta=new Float64Array([o-tgt]);
+    for(var l=net.W.length-1;l>=0;l--){
+      var prev=acts[l],nd=new Float64Array(prev.length);
+      for(var j2=0;j2<delta.length;j2++){
+        var d=delta[j2],row=net.W[l][j2];
+        for(var k2=0;k2<row.length;k2++){nd[k2]+=row[k2]*d;row[k2]-=lr*d*prev[k2];}
+        net.B[l][j2]-=lr*d;
+      }
+      if(l>0){for(var k3=0;k3<nd.length;k3++)nd[k3]*=(1-acts[l][k3]*acts[l][k3]);}
+      delta=nd;
+    }
+  }
+  return loss/pts.length;
+}
+function nnAcc(net,pts){
+  var c=0;
+  for(var i=0;i<pts.length;i++){
+    var a=nnForward(net,pts[i].x,pts[i].y);
+    if(((a[a.length-1][0]>0.5)?1:0)===pts[i].c)c++;
+  }
+  return pts.length?c/pts.length:0;
+}
+/* NN-CORE-END */
+
+/* ---- Neural Lab app ---- */
+inits.lab = function(){
+  var cv=document.getElementById('nnCanvas'),ctx=cv.getContext('2d');
+  var pts=[],net=nnMake(),epoch=0,lastLoss=NaN,training=false,curC=1,dirty=true;
+  var W=0,H=0,gw=72,gh=48,off=document.createElement('canvas'),offCtx=off.getContext('2d'),img=null;
+  var stE=document.getElementById('stEpoch'),stL=document.getElementById('stLoss'),stA=document.getElementById('stAcc');
+  var trainBtn=document.getElementById('trainBtn');
+  function size(){
+    var DPR=Math.min(devicePixelRatio||1,2);
+    var pw=cv.parentElement.clientWidth; if(pw<60)return;
+    W=pw; H=Math.max(280,Math.min(460,Math.round(W*0.62)));
+    cv.width=W*DPR;cv.height=H*DPR;cv.style.height=H+'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    gh=Math.max(30,Math.round(gw*H/W));
+    off.width=gw;off.height=gh;img=offCtx.createImageData(gw,gh);
+    dirty=true;
+  }
+  function boundary(){
+    var dk=document.body.classList.contains('dark');
+    var pr=dk?63:31, pg=dk?169:111, pb=dk?140:92, gr=dk?210:192, gg=dk?164:145, gb=dk?85:58;
+    var d=img.data,i=0;
+    for(var gy=0;gy<gh;gy++)for(var gx=0;gx<gw;gx++){
+      var x=((gx+0.5)/gw)*2-1,y=((gy+0.5)/gh)*2-1;
+      var a=nnForward(net,x,y),o=a[a.length-1][0];
+      if(o>0.5){d[i]=pr;d[i+1]=pg;d[i+2]=pb;d[i+3]=Math.round((o-0.5)*2*80);}
+      else{d[i]=gr;d[i+1]=gg;d[i+2]=gb;d[i+3]=Math.round((0.5-o)*2*80);}
+      i+=4;
+    }
+    offCtx.putImageData(img,0,0);
+  }
+  function enough(){
+    var a=0,b=0;
+    for(var i=0;i<pts.length;i++){if(pts[i].c===1)a++;else b++;}
+    return a>=2&&b>=2;
+  }
+  function draw(){
+    var dk=document.body.classList.contains('dark');
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle=dk?'#18231E':'#F9FBFA';ctx.fillRect(0,0,W,H);
+    ctx.imageSmoothingEnabled=true;
+    ctx.drawImage(off,0,0,W,H);
+    for(var i=0;i<pts.length;i++){
+      var p=pts[i],px=(p.x+1)/2*W,py=(p.y+1)/2*H;
+      ctx.fillStyle=p.c===1?(dk?'#3FA98C':'#1F6F5C'):(dk?'#D2A455':'#C0913A');
+      ctx.strokeStyle=dk?'#101814':'#fff';ctx.lineWidth=1.6;
+      ctx.beginPath();ctx.arc(px,py,5,0,6.283);ctx.fill();ctx.stroke();
+    }
+    if(!pts.length){
+      ctx.fillStyle=dk?'#8FA39A':'#76837C';ctx.font='500 13px "Spline Sans Mono",monospace';ctx.textAlign='center';
+      ctx.fillText('click anywhere to drop dots',W/2,H/2-9);
+      ctx.fillText('— or pick a pattern —',W/2,H/2+13);
+    } else if(!enough()&&!training){
+      ctx.fillStyle=dk?'#8FA39A':'#76837C';ctx.font='500 12px "Spline Sans Mono",monospace';ctx.textAlign='center';
+      ctx.fillText('drop at least 2 dots of each colour, then press train',W/2,H-12);
+    }
+  }
+  function stats(){
+    stE.textContent=epoch.toLocaleString('en-IN');
+    stL.textContent=isNaN(lastLoss)?'—':lastLoss.toFixed(3);
+    stA.textContent=pts.length?Math.round(nnAcc(net,pts)*100)+'%':'—';
+  }
+  function lrf(){return Math.max(0.03,0.12/(1+epoch*0.0008));}
+  function loop(){
+    requestAnimationFrame(loop);
+    if(document.hidden)return;
+    var w=winEl('lab');
+    if(!w.classList.contains('open')||w.style.display==='none')return;
+    if(training&&enough()){
+      for(var i=0;i<2;i++)lastLoss=nnEpoch(net,pts,lrf());
+      epoch+=2;dirty=true;stats();
+    }
+    if(dirty){boundary();draw();dirty=false;}
+  }
+  function setTraining(on){
+    training=on&&enough();
+    trainBtn.textContent=training?'Pause training':'Train the network';
+    trainBtn.classList.toggle('training',training);
+    if(on&&!enough())dirty=true;
+  }
+  cv.addEventListener('pointerdown',function(ev){
+    var r=cv.getBoundingClientRect();
+    var x=((ev.clientX-r.left)/r.width)*2-1,y=((ev.clientY-r.top)/r.height)*2-1;
+    if(pts.length<300)pts.push({x:x,y:y,c:curC});
+    dirty=true;stats();
+  });
+  document.querySelectorAll('.cls').forEach(function(b){
+    b.addEventListener('click',function(){
+      curC=+b.dataset.c;
+      document.querySelectorAll('.cls').forEach(function(o){o.classList.toggle('on',o===b);});
+    });
+  });
+  trainBtn.addEventListener('click',function(){setTraining(!training);});
+  document.getElementById('resetBtn').addEventListener('click',function(){
+    net=nnMake();epoch=0;lastLoss=NaN;setTraining(false);dirty=true;stats();
+  });
+  document.getElementById('clearBtn').addEventListener('click',function(){
+    pts=[];net=nnMake();epoch=0;lastLoss=NaN;setTraining(false);dirty=true;stats();
+  });
+  function gauss(){return (Math.random()+Math.random()+Math.random()-1.5)/1.5;}
+  var PRESETS={
+    blobs:function(){var o=[],i;for(i=0;i<32;i++)o.push({x:-0.48+gauss()*0.2,y:-0.3+gauss()*0.2,c:1});for(i=0;i<32;i++)o.push({x:0.46+gauss()*0.2,y:0.36+gauss()*0.2,c:0});return o;},
+    circle:function(){var o=[],i,t,r;for(i=0;i<40;i++){t=Math.random()*6.283;r=Math.sqrt(Math.random())*0.3;o.push({x:Math.cos(t)*r,y:Math.sin(t)*r,c:1});}for(i=0;i<50;i++){t=Math.random()*6.283;r=0.55+Math.random()*0.3;o.push({x:Math.cos(t)*r,y:Math.sin(t)*r,c:0});}return o;},
+    spiral:function(){var o=[];for(var arm=0;arm<2;arm++)for(var i=0;i<52;i++){var t=i/51,r=0.12+0.75*t,th=t*3.4*Math.PI+arm*Math.PI;o.push({x:r*Math.cos(th)+gauss()*0.025,y:r*Math.sin(th)+gauss()*0.025,c:arm});}return o;}
+  };
+  document.querySelectorAll('.preset').forEach(function(b){
+    b.addEventListener('click',function(){
+      pts=PRESETS[b.dataset.p]();net=nnMake();epoch=0;lastLoss=NaN;
+      dirty=true;stats();setTraining(true);
+    });
+  });
+  if (typeof ResizeObserver!=='undefined') new ResizeObserver(function(){size();}).observe(cv.parentElement);
+  addEventListener('oschrome', function(){ dirty=true; });
+  size();stats();requestAnimationFrame(loop);
+};
+
+/* ---- Match app (tested engine) ---- */
+var SKILLS = [
+ {rx:/\b(llms?|large language|gen(erative)?[\s-]?ai|gpt|openai|claude|gemini|foundation model)/i, sk:"LLMs / Generative AI", have:1, w:3, cat:"ai", ev:"Ships a GenAI compliance platform reviewing 8,000+ documents/month with Azure OpenAI in production at UBS."},
+ {rx:/\bpython\b/i, sk:"Python", have:1, w:3, cat:"both", ev:"Primary language across every project — LLM pipelines, ML models, ETL, APIs."},
+ {rx:/\b(prompt engineering|prompt design)/i, sk:"Prompt engineering", have:1, w:2, cat:"ai", ev:"Designed grouped LLM policy checks and contextual routing that cut API calls 67%."},
+ {rx:/\brag\b|retrieval[\s-]augmented/i, sk:"RAG / retrieval", have:1, w:2, cat:"ai", ev:"Built retrieval and chunk-routing layers directing document content to relevant checks."},
+ {rx:/\b(langgraph|langchain|agents?|agentic|multi[\s-]agent|crewai|autogen)\b/i, sk:"Agentic AI / orchestration", have:1, w:2, cat:"ai", ev:"Built Ada — a 9-agent LangGraph platform automating the full ML workflow (github.com/shubh0614)."},
+ {rx:/\bnlp\b|natural language/i, sk:"NLP", have:1, w:2, cat:"ai", ev:"Production NLP across compliance text classification and policy checks."},
+ {rx:/\b(machine learning|\bml\b|predictive model|classification|regression)/i, sk:"Machine learning", have:1, w:3, cat:"ai", ev:"Trained a predictive model on 15,000 records automating 4,000+ decisions/year at 96% accuracy."},
+ {rx:/\b(tensorflow|keras)\b/i, sk:"TensorFlow", have:1, w:1, cat:"ai", ev:"Google-certified TensorFlow Developer; deep learning and time-series coursework."},
+ {rx:/\bpytorch\b/i, sk:"PyTorch", have:1, w:1, cat:"ai", ev:"Working proficiency through self-directed deep-learning projects."},
+ {rx:/\b(deep learning|neural network)/i, sk:"Deep learning", have:1, w:1, cat:"ai", ev:"TensorFlow-certified; LSTM and sequence modelling experience."},
+ {rx:/\bcomputer vision|opencv|image (processing|recognition)/i, sk:"Computer vision", have:1, w:1, cat:"ai", ev:"Azure OpenAI vision checks over document page images in the compliance platform."},
+ {rx:/\bazure\b/i, sk:"Azure", have:1, w:2, cat:"both", ev:"Daily driver — Azure OpenAI, Data Factory; certified Azure AI Engineer (AI-102) and Data Scientist (DP-100)."},
+ {rx:/\baws\b|amazon web services/i, sk:"AWS", have:1, w:1, cat:"both", ev:"Working familiarity; primary cloud depth is Azure (4 Azure certifications)."},
+ {rx:/\bpower\s?bi\b/i, sk:"Power BI", have:1, w:3, cat:"da", ev:"PL-300 certified. Built INSPIRE (80+ systems unified) and executive KRI dashboards for Investment Bank leadership."},
+ {rx:/\bdax\b/i, sk:"DAX", have:1, w:2, cat:"da", ev:"Advanced DAX across INSPIRE and compliance reporting models."},
+ {rx:/\btableau\b/i, sk:"Tableau", have:1, w:2, cat:"da", ev:"Led a full migration of compliance reporting from Tableau to Power BI."},
+ {rx:/\b(sql|postgres(ql)?|ms[\s-]?sql|t-sql|mysql)\b/i, sk:"SQL & databases", have:1, w:3, cat:"da", ev:"PostgreSQL and MS SQL in production — recommendation logic, ETL targets, reporting models."},
+ {rx:/\b(etl|elt|data pipeline|data engineering)\b/i, sk:"ETL / data pipelines", have:1, w:3, cat:"da", ev:"Azure Data Factory pipelines integrating HPE, Dell, Lenovo APIs; BigID scan loads; vendor telemetry."},
+ {rx:/\b(azure data factory|adf)\b/i, sk:"Azure Data Factory", have:1, w:2, cat:"da", ev:"Multiple production pipelines — vendor APIs, compliance scans, telemetry integration."},
+ {rx:/\b(microsoft fabric|fabric)\b/i, sk:"Microsoft Fabric", have:1, w:2, cat:"da", ev:"Certified Fabric Analytics Engineer (DP-600, 2025)."},
+ {rx:/\balteryx\b/i, sk:"Alteryx", have:1, w:1, cat:"da", ev:"Alteryx Designer Core certified; used in UBS analytics workflows."},
+ {rx:/\b(power automate|workflow automation)\b/i, sk:"Power Automate", have:1, w:1, cat:"da", ev:"Automated alerting to 100+ stakeholders, eliminating ~2 FTEs of manual effort."},
+ {rx:/\bexcel\b/i, sk:"Excel", have:1, w:1, cat:"da", ev:"Automated auditable Excel exports (openpyxl) consumed by compliance reviewers."},
+ {rx:/\b(pandas|numpy)\b/i, sk:"pandas / numpy", have:1, w:1, cat:"both", ev:"Core of every data-processing layer I ship."},
+ {rx:/\b(fastapi|flask|rest api|apis?)\b/i, sk:"APIs / FastAPI", have:1, w:1, cat:"both", ev:"Built FastAPI services for Ada; integrated enterprise vendor APIs at UBS."},
+ {rx:/\bgit(hub|lab)?\b/i, sk:"Git / version control", have:1, w:1, cat:"both", ev:"Daily — including GitLab CI/CD integration in Ada."},
+ {rx:/\b(ci\/?cd|devops|deployment pipeline)\b/i, sk:"CI/CD", have:1, w:1, cat:"both", ev:"GitLab CI/CD pipelines integrated into Ada's deployment flow."},
+ {rx:/\b(stakeholder|executive|leadership|presentation|communication skills)\b/i, sk:"Stakeholder & communication", have:1, w:2, cat:"both", ev:"Presents KRI dashboards directly to Investment Bank leadership; led cross-team engagement on the compliance platform."},
+ {rx:/\b(compliance|regulatory|risk|audit|kyc|aml)\b/i, sk:"Compliance & risk domain", have:1, w:2, cat:"both", ev:"2.5 years inside Investment Banking compliance and operational risk at UBS."},
+ {rx:/\b(banking|financial services|fintech|investment bank|capital markets)\b/i, sk:"Financial services domain", have:1, w:2, cat:"both", ev:"Entire career to date inside UBS Investment Banking."},
+ {rx:/\b(data visuali[sz]ation|dashboards?|reporting|bi\b|business intelligence)/i, sk:"BI & visualization", have:1, w:2, cat:"da", ev:"INSPIRE, Solution Designer Studio, executive KRI dashboards — all in production."},
+ {rx:/\b(statistics|statistical|a\/b test|hypothesis)/i, sk:"Statistics", have:1, w:1, cat:"da", ev:"Applied statistics through predictive modelling and time-series certification work."},
+ {rx:/\b(docker|kubernetes|k8s|containeri)/i, sk:"Docker / Kubernetes", have:0, w:1, cat:"both", adj:"Not yet used in production — my deployments run on Azure-managed services. Comfortable picking it up fast (see: 24 certifications)."},
+ {rx:/\b(spark|databricks|pyspark|hadoop)\b/i, sk:"Spark / Databricks", have:0, w:1, cat:"da", adj:"Closest production experience is Azure Data Factory + Fabric at enterprise scale — the same distributed-data concepts, different engine."},
+ {rx:/\b(airflow|dagster|prefect)\b/i, sk:"Airflow", have:0, w:1, cat:"da", adj:"Deep production experience with Azure Data Factory — the same orchestration paradigm (DAGs, scheduling, retries)."},
+ {rx:/\b(snowflake|redshift|bigquery)\b/i, sk:"Cloud warehouses", have:0, w:1, cat:"da", adj:"Production SQL depth is PostgreSQL/MS SQL + Fabric; warehouse concepts transfer directly."},
+ {rx:/\b(java|scala|c\+\+|golang|\bgo\b)\b/i, sk:"Java / Scala / Go", have:0, w:1, cat:"both", adj:"My stack is Python-first; happy to discuss whether that fits your team's needs."},
+ {rx:/\b(fine[\s-]?tun|lora|peft|model training)/i, sk:"Fine-tuning", have:0, w:1, cat:"ai", adj:"Currently in my active study roadmap (transformers → fine-tuning → agentic AI); production work so far uses prompt-engineering and routing instead."},
+ {rx:/\b(mlops|model monitoring|model registry|mlflow)\b/i, sk:"MLOps", have:1, w:1, cat:"ai", ev:"Built deployment, retry and human-approval gates in Ada; certified Azure Data Scientist (DP-100) covering ML lifecycle."}
+];
+var SAMPLES = {
+ ai: "We are hiring an AI Engineer with 3+ years of experience building LLM-powered applications. You will design RAG pipelines, work with Azure OpenAI or similar foundation models, and ship production Python services. Requirements: strong Python, prompt engineering, NLP, experience with agents (LangChain/LangGraph), REST APIs, SQL, CI/CD, and cloud (Azure or AWS). Experience in financial services or compliance is a plus. Docker/Kubernetes nice to have.",
+ da: "Seeking a Data Analyst with 2+ years of experience. You will build Power BI dashboards for senior stakeholders, write complex SQL, develop ETL pipelines, and automate reporting. Requirements: Power BI, DAX, SQL, ETL development (Azure Data Factory or Airflow), Excel, statistics, strong communication and stakeholder management. Experience in banking or risk a plus. Tableau and Alteryx nice to have."
+};
+inits.match = function(){
+  var ta = document.getElementById('jdText');
+  function row(hit, sk, ev){
+    return '<div class="m-row ' + (hit?'hit':'gap') + '"><div class="mk">' + (hit?'✓':'○') + '</div><div><span class="sk">' + sk + '</span> — <span class="evd">' + ev + '</span></div></div>';
+  }
+  function renderResult(pct, verdict, vsub, hits, gaps, yearsNote, rec){
+    var res = document.getElementById('m-result');
+    res.classList.add('show');
+    document.getElementById('mVerdict').textContent = verdict;
+    document.getElementById('mVsub').textContent = vsub;
+    var C = 264, fg = document.getElementById('ringFg');
+    fg.style.strokeDashoffset = C;
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ fg.style.strokeDashoffset = C - (C * pct / 100); }); });
+    var pctEl = document.getElementById('ringPct');
+    if (PRM) pctEl.textContent = pct + '%';
+    else { var t0 = performance.now(); (function tk(t){ var p = Math.min((t-t0)/1100,1); pctEl.textContent = Math.round(pct*(1-Math.pow(1-p,3))) + '%'; if(p<1) requestAnimationFrame(tk); })(t0); }
+    var A = '<a class="btn line sm" href="assets/Shubh_Resume_AI_Engineer.pdf" download>Best-fit résumé · AI/ML</a>';
+    var D = '<a class="btn line sm" href="assets/Shubh_Resume_Data_Analyst.pdf" download>Best-fit résumé · Analytics</a>';
+    document.getElementById('mResume').innerHTML = rec === 'ai' ? A : rec === 'da' ? D : (rec === 'both' ? A + D : '');
+    var rows = [];
+    if (yearsNote) rows.push(row(yearsNote.hit, yearsNote.sk, yearsNote.ev));
+    hits.sort(function(a,b){return b.w-a.w;}).forEach(function(s){ rows.push(row(1, s.sk, s.ev)); });
+    gaps.forEach(function(s){ rows.push(row(0, s.sk, s.adj)); });
+    document.getElementById('mList').innerHTML = rows.join('');
+    document.getElementById('mMore').textContent = hits.length + ' requirement' + (hits.length===1?'':'s') + ' matched against shipped work · ' + gaps.length + ' addressed honestly. Open Projects for the systems behind the evidence.';
+  }
+  function analyze(){
+    var txt = ta.value.trim();
+    if (txt.length < 60){
+      ta.focus();
+      ta.placeholder = 'Paste a fuller job description (a few lines at least) and I will analyze it properly...';
+      return;
+    }
+    var hits = [], gaps = [], wHave = 0, wTotal = 0, catScore = {ai:0, da:0};
+    SKILLS.forEach(function(s){
+      if (s.rx.test(txt)){
+        wTotal += s.w;
+        if (s.have){ wHave += s.w; hits.push(s); if (s.cat !== 'both') catScore[s.cat] += s.w; else { catScore.ai += s.w*0.5; catScore.da += s.w*0.5; } }
+        else gaps.push(s);
+      }
+    });
+    var yearsNote = null;
+    var ym = txt.match(/(\d+)\s*\+?\s*(?:years?|yrs?)/i);
+    if (ym){
+      var need = +ym[1];
+      if (need <= 2) yearsNote = {hit:1, sk:'Experience: '+need+'+ years', ev:'2.5 years of full-time experience at UBS — requirement met.'};
+      else if (need <= 4) yearsNote = {hit:1, sk:'Experience: '+need+'+ years', ev:'2.5 years — slightly under, but unusually dense: production LLM systems, a deployed ML model, and executive-facing delivery at a global bank.'};
+      else yearsNote = {hit:0, sk:'Experience: '+need+'+ years', ev:'Honest answer: I have 2.5. If the work in Projects looks like '+need+' years\u2019 worth, let\u2019s talk anyway.'};
+    }
+    if (wTotal === 0){ renderResult(50, 'Let\u2019s find out together.', 'I couldn\u2019t detect specific technical requirements in that text — but the track record speaks broadly.', hits, gaps, yearsNote, null); return; }
+    var pct = Math.round((wHave / wTotal) * 100), verdict, vsub;
+    if (pct >= 85){ verdict = 'Strong match. Worth a conversation.'; vsub = 'Nearly every requirement detected has direct production evidence behind it.'; }
+    else if (pct >= 65){ verdict = 'Solid match, with honest gaps.'; vsub = 'Most requirements are covered by shipped work; the rest are listed openly below.'; }
+    else if (pct >= 45){ verdict = 'Partial match — depends what you weight.'; vsub = 'Strong coverage in some areas, genuine gaps in others. The breakdown below is candid.'; }
+    else { verdict = 'Probably not the closest fit — respect for your time.'; vsub = 'If the matched strengths below matter most to you, I\u2019m still glad to talk.'; }
+    var rec = catScore.ai === catScore.da ? 'both' : (catScore.ai > catScore.da ? 'ai' : 'da');
+    renderResult(pct, verdict, vsub, hits, gaps, yearsNote, rec);
+  }
+  document.getElementById('matchBtn').addEventListener('click', analyze);
+  document.querySelectorAll('[data-sample]').forEach(function(b){
+    b.addEventListener('click', function(){ ta.value = SAMPLES[b.dataset.sample]; analyze(); });
+  });
+};
+
+/* ---- Dark / light mode ---- */
+(function(){
+  var btn = document.getElementById('themeBtn');
+  btn.addEventListener('click', function(){
+    var dark = document.body.classList.toggle('dark');
+    btn.textContent = dark ? '☀️' : '🌙';
+    btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    dispatchEvent(new Event('oschrome'));
+  });
+})();
+</script>
+</body>
+</html>
