@@ -1237,7 +1237,7 @@ inits.match = function(){
   var btn = document.getElementById('themeBtn');
   btn.addEventListener('click', function(){
     var dark = document.body.classList.toggle('dark');
-    btn.textContent = dark ? '☀️' : 'ðŸŒ™';
+    btn.textContent = dark ? '☀️' : '🌙';
     btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
     dispatchEvent(new Event('oschrome'));
   });
