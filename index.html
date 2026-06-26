@@ -1,7 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❖</text></svg>">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ShubhOS — Shubh Pathak's interactive portfolio</title>
 <meta name="description" content="Boot into ShubhOS: Shubh Pathak's portfolio as a tiny operating system. Drag windows, train a neural network, run terminal commands, match your JD against his experience.">
@@ -286,7 +287,7 @@ h3.app-h em{font-style:italic;color:var(--pine)}
 <noscript><div style="padding:40px;max-width:640px;margin:0 auto">
 <h1>Shubh Pathak</h1><p>AI systems &amp; data platforms engineer at UBS Investment Banking, Pune. 8,000+ documents auto-reviewed monthly · 200+ hours saved · 96% model accuracy.</p>
 <p>Email: shubhpathakpro@gmail.com · <a href="https://www.linkedin.com/in/shubhpathak0614">LinkedIn</a> · <a href="https://github.com/shubh0614">GitHub</a></p>
-<p><a href="assets/Shubh_Resume_AI_Engineer.pdf">Résumé (AI/ML)</a> · <a href="assets/Shubh_Resume_Data_Analyst.pdf">Résumé (Analytics)</a></p>
+<p><a href="assets/Shubh_Resume_AI_Engineer.pdf">RÃ©sumÃ© (AI/ML)</a> · <a href="assets/Shubh_Resume_Data_Analyst.pdf">RÃ©sumÃ© (Analytics)</a></p>
 <p>This portfolio is an interactive operating system — enable JavaScript to boot it.</p>
 </div></noscript>
 
@@ -356,7 +357,7 @@ h3.app-h em{font-style:italic;color:var(--pine)}
       <div class="spec"><span class="k">Education</span><span class="v">B.Tech CS, VIT · 8.70 CGPA</span></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
         <button class="btn pine sm" data-open="impact">See impact</button>
-        <button class="btn line sm" data-open="resume">Get résumé</button>
+        <button class="btn line sm" data-open="resume">Get rÃ©sumÃ©</button>
       </div>
     </div>
     <div class="rs"></div>
@@ -442,7 +443,7 @@ h3.app-h em{font-style:italic;color:var(--pine)}
           </div>
           <div class="lab-block">
             <h4>Under the hood</h4>
-            <p class="lab-note">Two hidden layers (12 + 12 neurons), hand-written backpropagation, ~60 lines of dependency-free JavaScript. Like TensorFlow Playground, it also sees simple transformations of your coordinates (sin, x·y, r²) — that's what lets it crack the spiral. The same idea, scaled a few billion times, powers what I build at work.</p>
+            <p class="lab-note">Two hidden layers (12 + 12 neurons), hand-written backpropagation, ~60 lines of dependency-free JavaScript. Like TensorFlow Playground, it also sees simple transformations of your coordinates (sin, x·y, rÂ²) — that's what lets it crack the spiral. The same idea, scaled a few billion times, powers what I build at work.</p>
           </div>
         </div>
       </div>
@@ -482,7 +483,7 @@ h3.app-h em{font-style:italic;color:var(--pine)}
 
   <!-- RESUME -->
   <section class="window" id="win-resume" data-app="resume" data-x="240" data-y="120" data-w="540" data-h="430" aria-label="Resume window">
-    <div class="titlebar"><div class="dots"><button class="dot close"></button><button class="dot min"></button><button class="dot max"></button></div><span class="wtitle">Résumé — 2 files</span></div>
+    <div class="titlebar"><div class="dots"><button class="dot close"></button><button class="dot min"></button><button class="dot max"></button></div><span class="wtitle">RÃ©sumÃ© — 2 files</span></div>
     <div class="wbody">
       <h3 class="app-h">Two lenses, one engineer.</h3>
       <p class="app-sub">Same career, framed for different readers. Take whichever fits your role — or both.</p>
@@ -555,7 +556,7 @@ h3.app-h em{font-style:italic;color:var(--pine)}
 var PRM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 var isMobile = function(){ return innerWidth < 740; };
 var zTop = 10;
-var APPNAMES = {welcome:'Welcome',about:'About Shubh',experience:'Experience',projects:'Projects',impact:'Impact Monitor',lab:'Neural Lab',match:'Match',resume:'Résumé',terminal:'Terminal',contact:'Contact'};
+var APPNAMES = {welcome:'Welcome',about:'About Shubh',experience:'Experience',projects:'Projects',impact:'Impact Monitor',lab:'Neural Lab',match:'Match',resume:'RÃ©sumÃ©',terminal:'Terminal',contact:'Contact'};
 var opened = {};   // app -> bool (ever opened, for lazy init)
 var inits = {};    // app -> init fn run on first open
 
@@ -784,13 +785,13 @@ var EXPERIENCE = [
     tags:['Power BI','DAX','Power Automate','data modelling','stakeholder management']}
   ]},
  {date:'JAN 2024 — JUL 2024', title:'Data Analyst Intern', org:'UBS · CDIO Technology',
-  blurb:'Migrated compliance reporting from Tableau to Power BI; built a failure-monitoring dashboard that cut investigation time from 2–3 days to under 6 hours.',
+  blurb:'Migrated compliance reporting from Tableau to Power BI; built a failure-monitoring dashboard that cut investigation time from 2â€“3 days to under 6 hours.',
   projects:[]}
 ];
 
 /* ============================================================
    PROJECTS — personal builds only.
-   ➕ TO ADD A NEW PROJECT, copy this template into the array:
+   âž• TO ADD A NEW PROJECT, copy this template into the array:
    {t:'Project name', org:'PERSONAL · 2026',
     d:'What it is and how it works.',
     b:'The before state.',
@@ -898,7 +899,7 @@ inits.terminal = function(){
   function print(s, cls){ out.innerHTML += (cls?'<span class="'+cls+'">':'') + s + (cls?'</span>':'') + '\n'; out.scrollTop = out.scrollHeight; }
   function banner(){
     print('       ❖  ShubhOS 3.0 — portfolio kernel', 'p');
-    print('  ─────────────────────────────────────────', 'dim');
+    print('  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€', 'dim');
     print('  user: shubh_pathak     role: AI & data engineer @ UBS');
     print('  uptime: 2.5 yrs        certs: 24 (MS · Google · Oracle)');
     print('  throughput: 8,000+ docs/month · 200+ hrs saved/month');
@@ -933,7 +934,7 @@ inits.terminal = function(){
     }
     if (cmd === 'open'){
       var app = parts[1];
-      if (app && winEl(app)){ print('opening ' + app + '…', 'dim'); openApp(app); }
+      if (app && winEl(app)){ print('opening ' + app + 'â€¦', 'dim'); openApp(app); }
       else print('usage: open <experience|projects|lab|match|resume|contact|impact|about|terminal>', 'dim');
       return;
     }
@@ -1183,8 +1184,8 @@ inits.match = function(){
     var pctEl = document.getElementById('ringPct');
     if (PRM) pctEl.textContent = pct + '%';
     else { var t0 = performance.now(); (function tk(t){ var p = Math.min((t-t0)/1100,1); pctEl.textContent = Math.round(pct*(1-Math.pow(1-p,3))) + '%'; if(p<1) requestAnimationFrame(tk); })(t0); }
-    var A = '<a class="btn line sm" href="assets/Shubh_Resume_AI_Engineer.pdf" download>Best-fit résumé · AI/ML</a>';
-    var D = '<a class="btn line sm" href="assets/Shubh_Resume_Data_Analyst.pdf" download>Best-fit résumé · Analytics</a>';
+    var A = '<a class="btn line sm" href="assets/Shubh_Resume_AI_Engineer.pdf" download>Best-fit rÃ©sumÃ© · AI/ML</a>';
+    var D = '<a class="btn line sm" href="assets/Shubh_Resume_Data_Analyst.pdf" download>Best-fit rÃ©sumÃ© · Analytics</a>';
     document.getElementById('mResume').innerHTML = rec === 'ai' ? A : rec === 'da' ? D : (rec === 'both' ? A + D : '');
     var rows = [];
     if (yearsNote) rows.push(row(yearsNote.hit, yearsNote.sk, yearsNote.ev));
@@ -1216,7 +1217,7 @@ inits.match = function(){
       else if (need <= 4) yearsNote = {hit:1, sk:'Experience: '+need+'+ years', ev:'2.5 years — slightly under, but unusually dense: production LLM systems, a deployed ML model, and executive-facing delivery at a global bank.'};
       else yearsNote = {hit:0, sk:'Experience: '+need+'+ years', ev:'Honest answer: I have 2.5. If the work in Projects looks like '+need+' years\u2019 worth, let\u2019s talk anyway.'};
     }
-    if (wTotal === 0){ renderResult(50, 'Let\u2019s find out together.', 'I couldn\u2019t detect specific technical requirements in that text — but the track record speaks broadly.', hits, gaps, yearsNote, null); return; }
+    if (wTotal === 0){ renderResult(8, 'Probably not the right fit.', 'No technical requirements from my domain were detected in this description. If this is a non-technical or unrelated role, my background in AI systems and data engineering is unlikely to be what you need.', hits, gaps, yearsNote, null); return; }
     var pct = Math.round((wHave / wTotal) * 100), verdict, vsub;
     if (pct >= 85){ verdict = 'Strong match. Worth a conversation.'; vsub = 'Nearly every requirement detected has direct production evidence behind it.'; }
     else if (pct >= 65){ verdict = 'Solid match, with honest gaps.'; vsub = 'Most requirements are covered by shipped work; the rest are listed openly below.'; }
@@ -1236,7 +1237,7 @@ inits.match = function(){
   var btn = document.getElementById('themeBtn');
   btn.addEventListener('click', function(){
     var dark = document.body.classList.toggle('dark');
-    btn.textContent = dark ? '☀️' : '🌙';
+    btn.textContent = dark ? '☀️' : 'ðŸŒ™';
     btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
     dispatchEvent(new Event('oschrome'));
   });
@@ -1244,3 +1245,4 @@ inits.match = function(){
 </script>
 </body>
 </html>
+
