@@ -805,6 +805,13 @@ var PROJECTS = [
   a:'<b>Dataset in, deployed model out</b> — the full pipeline automated behind a web interface.',
   delta:'9 agents', tags:['LangGraph','multi-agent systems','FastAPI','React','OpenAI API','CI/CD'],
   link:'https://github.com/shubh0614/ADA-MLFlow'},
+ {t:'InvestIQ: AI-powered research dashboard', org:'PERSONAL · klypup-research.vercel.app',
+  d:'A multi-tenant SaaS where an analyst types a natural-language question and receives a structured, sourced report in seconds: live market data, sentiment-badged financial news, knowledge-base filings (pgvector), and a price chart. An agentic layer selects which data tools to call and runs them in parallel; a Zod schema enforces source attribution on every factual claim so no datum can appear without a source chip. RLS policies at the Postgres tier guarantee org-level isolation; admin/analyst RBAC is enforced at both the API route and database tiers. <em style="font-size:12.5px;color:var(--muted);font-style:normal">Built end-to-end with AI assistance — proof that an AI specialist can own the full stack when the right tools are in the loop.</em>',
+  b:'Analysts manually pulling from multiple systems: no single source of truth, no attribution trail, no audit log.',
+  a:'<b>A sourced research report in seconds.</b> Agentic tool selection, parallel execution, and a strict Zod schema mean every datum carries a verified source chip; cross-tenant reads return zero rows at the DB tier, not an application-layer check.',
+  delta:'multi-tenant · RLS-isolated', tags:['Next.js 16','Supabase','pgvector','Vercel AI SDK','Groq','TypeScript','TanStack Query','Tailwind v4','Recharts'],
+  repo:'https://github.com/shubh0614/Investment-Research-Dashboard',
+  link:'https://klypup-research.vercel.app'},
  {t:'ShubhOS — this very website', org:'PERSONAL · YOU ARE INSIDE IT',
   d:'A portfolio that behaves like an operating system: draggable windows, a dock, a working terminal, a JD-matching engine, and a neural network you can train — hand-built in one dependency-free HTML file. No frameworks, no build step, hand-written backpropagation.',
   b:'Portfolios are PDFs you scroll once and forget.',
@@ -828,7 +835,9 @@ inits.projects = function(){
       '<div class="ba"><div class="ba-box ba-before"><span class="tag">BEFORE</span>'+p.b+'</div>'+
       '<div class="ba-box ba-after"><span class="tag">AFTER</span>'+p.a+'</div></div>'+
       '<div style="display:flex;gap:7px;flex-wrap:wrap">'+p.tags.map(function(t){return '<span class="chip">'+t+'</span>';}).join('')+'</div>'+
-      (p.link ? '<p style="margin-top:14px"><a class="btn line sm" href="'+p.link+'" target="_blank" rel="noopener">View on GitHub ↗</a></p>' : '');
+      (p.link ? '<p style="margin-top:14px">'+
+        (p.repo ? '<a class="btn line sm" href="'+p.repo+'" target="_blank" rel="noopener">GitHub ↗</a> ' : '')+
+        '<a class="btn pine sm" href="'+p.link+'" target="_blank" rel="noopener">'+(p.repo ? 'Live demo ↗' : (p.link.includes('github') ? 'View on GitHub ↗' : 'Live demo ↗'))+'</a></p>' : '');
     main.scrollTop = 0;
   }
   side.addEventListener('click', function(e){
